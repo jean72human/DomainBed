@@ -53,6 +53,7 @@ ALGORITHMS = [
     'CausIRL_MMD',
     'FLR',
     'LLR',
+    'JTT',
 ]
 
 def get_algorithm_class(algorithm_name):

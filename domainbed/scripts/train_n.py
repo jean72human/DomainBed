@@ -60,8 +60,8 @@ if __name__ == "__main__":
 
     # TODO: remove this after testing is done
     args.task = "domain_adaptation"
-    args.dataset = "SpawriousM2M_easy"
-    args.algorithm = "LLR"
+    args.dataset = "SpawriousM2M_easy_JTT"
+    args.algorithm = "ERM"
     args.data_dir = "/home/aengusl/Desktop/Projects/OOD_workshop/DomainBed-SP/data/spawrious224"
 
     print("Environment:")
@@ -243,8 +243,12 @@ if __name__ == "__main__":
         for step in range(start_step, n_steps+retrain_steps):
             print("Step {}/{}".format(step, n_steps+retrain_steps))
             step_start_time = time.time()
-            minibatches_device = [(x.to(device), y.to(device))
+            if not args.dataset.endswith("JTT"):
+                minibatches_device = [(x.to(device), y.to(device))
                 for x,y in next(train_minibatches_iterator)]
+            else:
+                minibatches_device = [(x.to(device), y.to(device))
+                for x,y, w in next(train_minibatches_iterator)]
             if args.task == "domain_adaptation":
                 uda_device = [(x.to(device), y.to(device))
                     for x,y in next(uda_minibatches_iterator)]

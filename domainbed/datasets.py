@@ -6,6 +6,7 @@ import torchvision.datasets.folder
 from torch.utils.data import TensorDataset, Subset, ConcatDataset, Dataset
 from torchvision.datasets import MNIST, ImageFolder
 from torchvision.transforms.functional import rotate
+from torch.utils.data import DataLoader
 
 from wilds.datasets.camelyon17_dataset import Camelyon17Dataset
 from wilds.datasets.fmow_dataset import FMoWDataset
@@ -612,3 +613,305 @@ class SpawriousM2M_hard(SpawriousBenchmark):
         test = ["snow","beach","dirt","jungle"]
         combinations = self.build_type2_combination(group,test)
         super().__init__(combinations['train_combinations'], combinations['test_combinations'], root_dir, hparams['data_augmentation'])
+
+
+
+# --------------------------------------
+# JTT
+# --------------------------------------
+
+
+def get_misclassifications(path_to_saved_model, model_architecture, dataset_object) -> list:
+    """
+    Loads a model from path_to_saved_model, evaluates it on dataset_object and returns a list of misclassifications.
+
+    :param path_to_saved_model: path to the saved model state dictionary
+    :param model_architecture: an instance of the model's architecture (not trained)
+    :param dataset_object: dataset on which the model is evaluated
+    :return: list of weights (0s and 1s) with 1s representing misclassified samples
+    """
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+    # Load model
+    model_architecture.load_state_dict(torch.load(path_to_saved_model))
+    model_architecture.to(device).eval()
+
+    dataloader = DataLoader(dataset_object, batch_size=32, shuffle=False)
+
+    misclassification_weights = [0] * len(dataset_object)  # Initialize all weights to 0
+
+    with torch.no_grad():
+        for idx, (inputs, labels) in enumerate(dataloader):
+            inputs, labels = inputs.to(device), labels.to(device)
+
+            # Forward pass
+            outputs = model_architecture(inputs)
+            _, predicted = outputs.max(1)
+
+            # Find misclassified samples in this batch and mark them with a weight of 1
+            misclassified_in_batch = (predicted != labels).nonzero(as_tuple=False).squeeze().tolist()
+
+            for mis_idx in misclassified_in_batch:
+                misclassification_weights[idx * dataloader.batch_size + mis_idx] = 1
+
+    return misclassification_weights
+
+
+class TripletImageFolder(Dataset):
+    def __init__(self, folder_path, class_index, transform, misclassifications=None, model_path=None, model_arch=None):
+        self.folder_path = folder_path
+        self.transform = transform
+        self.data = CustomImageFolder(folder_path=folder_path, transform=transform, class_index=class_index)
+        self.class_index = class_index
+        
+        if model_path and model_arch:
+            self.misclassifications = self.generate_misclassifications(model_path, model_arch, folder_path, transform)
+        else:
+            self.misclassifications = misclassifications if misclassifications is not None else [0] * len(self.data)
+
+    @staticmethod
+    def generate_misclassifications(model_path, model_arch, folder_path, transform):
+        dataset_for_evaluation = ImageFolder(root=folder_path, transform=transform)
+        return get_misclassifications(model_path, model_arch, dataset_for_evaluation)
+
+    def __len__(self):
+        return len(self.data)
+
+    def __getitem__(self, idx):
+        x, y = self.data[idx]
+        w = self.misclassifications[idx]
+        return x, y, w
+
+
+class SpawriousBenchmark_JTT(MultipleDomainDataset):
+    ENVIRONMENTS = ["Test", "SC_group_1", "SC_group_2"]
+    input_shape = (3, 224, 224)
+    num_classes = 4
+    class_list = ["bulldog", "corgi", "dachshund", "labrador"]
+
+    def __init__(self, train_combinations, test_combinations, root_dir, augment=True, type1=False, model_path=None, model_architecture=None):
+        # Get misclassifications if model_path and model_architecture are provided
+        misclassifications = None
+        if model_path and model_architecture:
+            misclassifications = get_misclassifications(model_path, model_architecture, ImageFolder(root_dir))
+
+        self.type1 = type1
+        train_datasets, test_datasets = self._prepare_data_lists(train_combinations, test_combinations, root_dir, augment)
+        self.datasets = [ConcatDataset(test_datasets)] + train_datasets
+        self.domain_adaptation_ds = ConcatDataset(self._prepare_data_lists_for_domain_adaptation(test_combinations, root_dir, augment))
+
+    # Prepares the train and test data lists by applying the necessary transformations.
+    def _prepare_data_lists(self, train_combinations, test_combinations, root_dir, augment):
+        test_transforms = transforms.Compose([
+            transforms.Resize((self.input_shape[1], self.input_shape[2])),
+            transforms.transforms.ToTensor(),
+            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+        ])
+        
+        if augment:
+            train_transforms = transforms.Compose([
+                transforms.Resize((self.input_shape[1], self.input_shape[2])),
+                transforms.RandomHorizontalFlip(),
+                transforms.ColorJitter(0.3, 0.3, 0.3, 0.3),
+                transforms.RandomGrayscale(),
+                transforms.ToTensor(),
+                transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+            ])
+        else:
+            train_transforms = test_transforms
+
+        train_data_list = self._create_data_list(train_combinations, root_dir, train_transforms)
+        test_data_list = self._create_data_list(test_combinations, root_dir, test_transforms)
+
+        return train_data_list, test_data_list
+
+    def _create_data_list(self, combinations, root_dir, transforms, misclassifications=None):
+        # Modify this function to use TripletImageFolder
+        data_list = []
+        if isinstance(combinations, dict):
+            # Build class groups for a given set of combinations, root directory, and transformations.
+            for_each_class_group = []
+            cg_index = 0
+            for classes, comb_list in combinations.items():
+                for_each_class_group.append([])
+                for ind, location_limit in enumerate(comb_list):
+                    if isinstance(location_limit, tuple):
+                        location, limit = location_limit
+                    else:
+                        location, limit = location_limit, None
+                    cg_data_list = []
+                    for cls in classes:
+                        path = os.path.join(root_dir, f"{0 if not self.type1 else ind}/{location}/{cls}")
+                        data = TripletImageFolder(folder_path=path, class_index=self.class_list.index(cls), transform=transforms, misclassifications=misclassifications)
+                        cg_data_list.append(data)
+
+                    for_each_class_group[cg_index].append(ConcatDataset(cg_data_list))
+                cg_index += 1
+
+            for group in range(len(for_each_class_group[0])):
+                data_list.append(
+                    ConcatDataset(
+                        [for_each_class_group[k][group] for k in range(len(for_each_class_group))]
+                    )
+                )
+        else:
+            for location in combinations:
+                path = os.path.join(root_dir, f"{0}/{location}/")
+                data = ImageFolder(root=path, transform=transforms)
+                data_list.append(data)
+
+        return data_list
+
+    
+    def _prepare_data_lists_for_domain_adaptation(self, test_combinations, root_dir, augment):
+        test_transforms = transforms.Compose([
+            transforms.Resize((self.input_shape[1], self.input_shape[2])),
+            transforms.transforms.ToTensor(),
+            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+        ])
+        
+        if augment:
+            train_transforms = transforms.Compose([
+                transforms.Resize((self.input_shape[1], self.input_shape[2])),
+                transforms.RandomHorizontalFlip(),
+                transforms.ColorJitter(0.3, 0.3, 0.3, 0.3),
+                transforms.RandomGrayscale(),
+                transforms.ToTensor(),
+                transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+            ])
+        else:
+            train_transforms = test_transforms
+
+        test_data_list = self._create_data_list_for_domain_adaptation(test_combinations, root_dir, train_transforms)
+
+        return test_data_list
+
+
+    def _create_data_list_for_domain_adaptation(self, combinations, root_dir, transforms):
+        data_list = []
+        if isinstance(combinations, dict):
+            
+            # Build class groups for a given set of combinations, root directory, and transformations.
+            for_each_class_group = []
+            cg_index = 0
+            for classes, comb_list in combinations.items():
+                for_each_class_group.append([])
+                for ind, location_limit in enumerate(comb_list):
+                    if isinstance(location_limit, tuple):
+                        location, limit = location_limit
+                    else:
+                        location, limit = location_limit, None
+                    cg_data_list = []
+                    for cls in classes:
+                        path = os.path.join(root_dir, f"domain_adaptation_ds/{location}/{cls}")
+                        data = CustomImageFolder(folder_path=path, class_index=self.class_list.index(cls), limit=limit, transform=transforms)
+                        cg_data_list.append(data)
+                    
+                    for_each_class_group[cg_index].append(ConcatDataset(cg_data_list))
+                cg_index += 1
+
+            for group in range(len(for_each_class_group[0])):
+                data_list.append(
+                    ConcatDataset(
+                        [for_each_class_group[k][group] for k in range(len(for_each_class_group))]
+                    )
+                )
+        else:
+            for location in combinations:
+                path = os.path.join(root_dir, f"{0}/{location}/")
+                data = ImageFolder(root=path, transform=transforms)
+                data_list.append(data)
+
+        return data_list
+    
+    # Buils combination dictionary for o2o datasets
+    def build_type1_combination(self,group,test,filler):
+        total = 3168
+        counts = [int(0.97*total),int(0.87*total)]
+        combinations = {}
+        combinations['train_combinations'] = {
+            ## correlated class
+            ("bulldog",):[(group[0],counts[0]),(group[0],counts[1])],
+            ("dachshund",):[(group[1],counts[0]),(group[1],counts[1])],
+            ("labrador",):[(group[2],counts[0]),(group[2],counts[1])],
+            ("corgi",):[(group[3],counts[0]),(group[3],counts[1])],
+            ## filler
+            ("bulldog","dachshund","labrador","corgi"):[(filler,total-counts[0]),(filler,total-counts[1])],
+        }
+        ## TEST
+        combinations['test_combinations'] = {
+            ("bulldog",):[test[0], test[0]],
+            ("dachshund",):[test[1], test[1]],
+            ("labrador",):[test[2], test[2]],
+            ("corgi",):[test[3], test[3]],
+        }
+        return combinations
+
+    # Buils combination dictionary for m2m datasets
+    def build_type2_combination(self,group,test):
+        total = 3168
+        counts = [total,total]
+        combinations = {}
+        combinations['train_combinations'] = {
+            ## correlated class
+            ("bulldog",):[(group[0],counts[0]),(group[1],counts[1])],
+            ("dachshund",):[(group[1],counts[0]),(group[0],counts[1])],
+            ("labrador",):[(group[2],counts[0]),(group[3],counts[1])],
+            ("corgi",):[(group[3],counts[0]),(group[2],counts[1])],
+        }
+        combinations['test_combinations'] = {
+            ("bulldog",):[test[0], test[1]],
+            ("dachshund",):[test[1], test[0]],
+            ("labrador",):[test[2], test[3]],
+            ("corgi",):[test[3], test[2]],
+        }
+        return combinations
+
+## Spawrious classes for each Spawrious dataset 
+class SpawriousO2O_easy_JTT(SpawriousBenchmark_JTT):
+    def __init__(self, root_dir, test_envs, hparams):
+        group = ["desert","jungle","dirt","snow"]
+        test = ["dirt","snow","desert","jungle"]
+        filler = "beach"
+        combinations = self.build_type1_combination(group,test,filler)
+        print('\nrunning the spawrious o2o easy jtt dataset\n')
+        super().__init__(combinations['train_combinations'], combinations['test_combinations'], root_dir, hparams['data_augmentation'], type1=True)
+
+class SpawriousO2O_medium_JTT(SpawriousBenchmark_JTT):
+    def __init__(self, root_dir, test_envs, hparams):
+        group = ['mountain', 'beach', 'dirt', 'jungle']
+        test = ['jungle', 'dirt', 'beach', 'snow']
+        filler = "desert"
+        combinations = self.build_type1_combination(group,test,filler)
+        super().__init__(combinations['train_combinations'], combinations['test_combinations'], root_dir, hparams['data_augmentation'], type1=True)
+
+class SpawriousO2O_hard_JTT(SpawriousBenchmark_JTT):
+    def __init__(self, root_dir, test_envs, hparams):
+        group = ['jungle', 'mountain', 'snow', 'desert']
+        test = ['mountain', 'snow', 'desert', 'jungle']
+        filler = "beach"
+        combinations = self.build_type1_combination(group,test,filler)
+        super().__init__(combinations['train_combinations'], combinations['test_combinations'], root_dir, hparams['data_augmentation'], type1=True)
+
+class SpawriousM2M_easy_JTT(SpawriousBenchmark_JTT):
+    def __init__(self, root_dir, test_envs, hparams):
+        group = ['desert', 'mountain', 'dirt', 'jungle']
+        test = ['dirt', 'jungle', 'mountain', 'desert']
+        combinations = self.build_type2_combination(group,test)
+        super().__init__(combinations['train_combinations'], combinations['test_combinations'], root_dir, hparams['data_augmentation']) 
+
+class SpawriousM2M_medium_JTT(SpawriousBenchmark_JTT):
+    def __init__(self, root_dir, test_envs, hparams):
+        group = ['beach', 'snow', 'mountain', 'desert']
+        test = ['desert', 'mountain', 'beach', 'snow']
+        combinations = self.build_type2_combination(group,test)
+        super().__init__(combinations['train_combinations'], combinations['test_combinations'], root_dir, hparams['data_augmentation'])
+        
+class SpawriousM2M_hard_JTT(SpawriousBenchmark_JTT):
+    ENVIRONMENTS = ["Test","SC_group_1","SC_group_2"]
+    def __init__(self, root_dir, test_envs, hparams):
+        group = ["dirt","jungle","snow","beach"]
+        test = ["snow","beach","dirt","jungle"]
+        combinations = self.build_type2_combination(group,test)
+        super().__init__(combinations['train_combinations'], combinations['test_combinations'], root_dir, hparams['data_augmentation'])
+
