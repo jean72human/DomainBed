@@ -64,12 +64,6 @@ if __name__ == "__main__":
     
     args = parser.parse_args()
 
-    # TODO: remove this after testing is done
-    args.dataset = "SpawriousM2M_easy_JTT"
-    args.algorithm = "JTT"
-    args.data_dir = "/home/aengusl/Desktop/Projects/OOD_workshop/DomainBed-SP/data/spawrious224"
-    args.pretrained_model_path = "/home/aengusl/Desktop/Projects/OOD_workshop/DomainBed-SP/domainbed/ERM_model_temp/model_step1.pkl"
-
     print("Environment:")
     print("\tPython: {}".format(sys.version.split(" ")[0]))
     print("\tPyTorch: {}".format(torch.__version__))
