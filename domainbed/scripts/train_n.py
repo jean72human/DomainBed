@@ -21,12 +21,16 @@ from domainbed import algorithms
 from domainbed.lib import misc
 from domainbed.lib.fast_data_loader import InfiniteDataLoader, FastDataLoader
 
+import pickle
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Domain generalization')
     parser.add_argument('--data_dir', type=str)
     parser.add_argument('--dataset', type=str, default="RotatedMNIST")
     parser.add_argument('--algorithm', type=str, default="ERM")
+    parser.add_argument('--pretrained_model_path', type=str, default=None, 
+                        help='Path to pretrained model pkl file, in the format saved by the save checkpoint function.')
     parser.add_argument('--task', type=str, default="domain_generalization",
         choices=["domain_generalization", "domain_adaptation"])
     parser.add_argument('--hparams', type=str,
@@ -59,10 +63,11 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # TODO: remove this after testing is done
-    args.task = "domain_adaptation"
+    args.task = "domain_generalization"
     args.dataset = "SpawriousM2M_easy_JTT"
-    args.algorithm = "ERM"
+    args.algorithm = "JTT"
     args.data_dir = "/home/aengusl/Desktop/Projects/OOD_workshop/DomainBed-SP/data/spawrious224"
+    args.pretrained_model_path = "/home/aengusl/Desktop/Projects/OOD_workshop/DomainBed-SP/domainbed/ERM_model_temp/model_step1.pkl"
 
     print("Environment:")
     print("\tPython: {}".format(sys.version.split(" ")[0]))
@@ -96,6 +101,8 @@ if __name__ == "__main__":
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
 
+    jtt_bool = args.dataset.endswith("JTT")
+
     if torch.cuda.is_available():
         device = args.device
         print("Using device {}.".format(device))
@@ -103,8 +110,20 @@ if __name__ == "__main__":
         device = "cpu"
 
     if args.dataset in vars(datasets):
-        dataset = vars(datasets)[args.dataset](args.data_dir,
-            args.test_envs, hparams)
+        if not jtt_bool:
+            dataset = vars(datasets)[args.dataset](args.data_dir,
+                args.test_envs, hparams)
+        else:
+            print('Using JTT dataset.')
+            assert args.pretrained_model_path is not None
+            # Load the pkl file at path domainbed/ERM_model_temp/model_step1.pkl
+            # save_dict = torch.load(os.path.join('./domainbed/ERM_model_temp', f'model_step1.pkl'))
+            save_dict = torch.load(args.pretrained_model_path)
+            model_architecture = save_dict['model_hparams']['arch']
+            model_dict = save_dict['model_dict']
+            dataset = vars(datasets)[args.dataset](args.data_dir,
+                args.test_envs, hparams, model_dict=model_dict, model_architecture=hparams['arch'], device=device)
+            algorithm_dict = model_dict
     else:
         raise NotImplementedError
 
@@ -127,7 +146,11 @@ if __name__ == "__main__":
         # If we ever want to implement checkpointing, just persist these values
         # every once in a while, and then load them from disk here.
         start_step = 0
-        algorithm_dict = None
+        if not jtt_bool:
+            algorithm_dict = None
+        elif iteration > 0:
+            algorithm_dict = None
+        
 
         random.seed(args.seed+iteration)
         np.random.seed(args.seed+iteration)
@@ -177,25 +200,26 @@ if __name__ == "__main__":
             num_workers=dataset.N_WORKERS)
             for i, (env, env_weights) in enumerate(in_splits)
             if i not in args.test_envs]
-        print('building uda loaders')
-        uda_loaders = [InfiniteDataLoader(
-            dataset=env,
-            weights=env_weights,
-            batch_size=hparams['batch_size'],
-            num_workers=dataset.N_WORKERS)
-            for i, (env, env_weights) in enumerate(uda_splits)]
+        if args.task == "domain_adaptation":
+            uda_loaders = [InfiniteDataLoader(
+                dataset=env,
+                weights=env_weights,
+                batch_size=hparams['batch_size'],
+                num_workers=dataset.N_WORKERS)
+                for i, (env, env_weights) in enumerate(uda_splits)]
         # uda_loaders = [FastDataLoader(
         #     dataset=env,
         #     # weights=env_weights,
         #     batch_size=hparams['batch_size'],
         #     num_workers=dataset.N_WORKERS)
         #     for i, (env, env_weights) in enumerate(uda_splits)]
-        print('building out loaders')        
+
         eval_loaders = [FastDataLoader(
             dataset=env,
             batch_size=64,
             num_workers=dataset.N_WORKERS)
             for env, _ in (in_splits + out_splits + uda_splits)]
+
         eval_weights = [None for _, weights in (in_splits + out_splits + uda_splits)]
         eval_loader_names = ['env{}_in'.format(i)
             for i in range(len(in_splits))]
@@ -205,10 +229,15 @@ if __name__ == "__main__":
             for i in range(len(uda_splits))]
 
         algorithm_class = algorithms.get_algorithm_class(args.algorithm)
-        algorithm = algorithm_class(dataset.input_shape, dataset.num_classes,
-            len(dataset) - len(args.test_envs), hparams)
+        if not jtt_bool:
+            algorithm = algorithm_class(dataset.input_shape, dataset.num_classes,
+                len(dataset) - len(args.test_envs), hparams)
+        else:
+            algorithm = algorithm_class(dataset.input_shape, dataset.num_classes,
+                len(dataset) - len(args.test_envs), hparams, upweight=1.0)
 
         if algorithm_dict is not None:
+            print('Loading model from previous checkpoint.')
             algorithm.load_state_dict(algorithm_dict)
 
         algorithm.to(device)
@@ -243,15 +272,19 @@ if __name__ == "__main__":
         for step in range(start_step, n_steps+retrain_steps):
             print("Step {}/{}".format(step, n_steps+retrain_steps))
             step_start_time = time.time()
-            if not args.dataset.endswith("JTT"):
+            if not jtt_bool:
                 minibatches_device = [(x.to(device), y.to(device))
                 for x,y in next(train_minibatches_iterator)]
             else:
-                minibatches_device = [(x.to(device), y.to(device))
+                minibatches_device = [(x.to(device), y.to(device), w.to(device))
                 for x,y, w in next(train_minibatches_iterator)]
             if args.task == "domain_adaptation":
-                uda_device = [(x.to(device), y.to(device))
+                if not jtt_bool:
+                    uda_device = [(x.to(device), y.to(device))
                     for x,y in next(uda_minibatches_iterator)]
+                else:
+                    uda_device = [(x.to(device), y.to(device), w.to(device))
+                    for x,y, w in next(uda_minibatches_iterator)]
             else:
                 uda_device = None
             if args.task == "domain_adaptation" and step >= n_steps and args.algorithm in ['LLR','FLR']:
@@ -280,7 +313,10 @@ if __name__ == "__main__":
 
                 evals = zip(eval_loader_names, eval_loaders, eval_weights)
                 for name, loader, weights in evals:
-                    acc = misc.accuracy(algorithm, loader, weights, device)
+                    if not jtt_bool:
+                        acc = misc.accuracy(algorithm, loader, weights, device)
+                    else:
+                        acc = misc.accuracy(algorithm, loader, weights, device, triplet=True)
                     results[name+'_acc'] = acc
 
                 results['mem_gb'] = torch.cuda.max_memory_allocated() / (1024.*1024.*1024.)

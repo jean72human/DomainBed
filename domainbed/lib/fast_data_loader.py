@@ -15,7 +15,6 @@ class _InfiniteSampler(torch.utils.data.Sampler):
 class InfiniteDataLoader:
     def __init__(self, dataset, weights, batch_size, num_workers):
         super().__init__()
-        print('beginning')
         if weights is not None:
             sampler = torch.utils.data.WeightedRandomSampler(weights,
                 replacement=True,
@@ -23,21 +22,18 @@ class InfiniteDataLoader:
         else:
             sampler = torch.utils.data.RandomSampler(dataset,
                 replacement=True)
-        print('sampler')
         if weights == None:
             weights = torch.ones(len(dataset))
-        print('weights')
         batch_sampler = torch.utils.data.BatchSampler(
             sampler,
             batch_size=batch_size,
             drop_last=True)
-        print('batch_sampler')
         self._infinite_iterator = iter(torch.utils.data.DataLoader(
             dataset,
             num_workers=num_workers,
             batch_sampler=_InfiniteSampler(batch_sampler)
         ))
-        print('infinite_iterator')
+
     def __iter__(self):
         while True:
             yield next(self._infinite_iterator)
