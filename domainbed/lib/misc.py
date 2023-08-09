@@ -209,7 +209,6 @@ def accuracy(network, loader, weights, device, triplet=False):
                     correct += (p.argmax(1).eq(y).float() * batch_weights).sum().item()
                 total += batch_weights.sum().item()
             network.train()
-            print('\n\nnormal loader\n\n')
         except:
             for x, y, w in loader:
                 x = x.to(device)
@@ -227,7 +226,7 @@ def accuracy(network, loader, weights, device, triplet=False):
                     correct += (p.argmax(1).eq(y).float() * batch_weights).sum().item()
                 total += batch_weights.sum().item()
             network.train()
-            print('triplet loader')
+
     
 
     return correct / total

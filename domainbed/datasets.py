@@ -398,7 +398,7 @@ class CustomImageFolder(Dataset):
             label = torch.tensor(self.class_index, dtype=torch.long)
             misclassifications = [0] * len(self.image_paths)
 
-            print("\tComputing misclassifications...")
+            print("\t\tComputing misclassifications...")
             for idx, image_path in tqdm(enumerate(self.image_paths)):
                 image = Image.open(image_path).convert('RGB')
                 image = test_transforms(image).to(device).unsqueeze(0)
@@ -673,8 +673,6 @@ class SpawriousBenchmark_JTT(MultipleDomainDataset):
         assert model_architecture is not None, "Model architecture must be provided for misclassification"
         assert device is not None, "Device must be provided for misclassification"
 
-        print('JTT spawrious')
-
         self.model_dict = model_dict
         self.model_architecture = model_architecture
         self.device = device
@@ -682,6 +680,7 @@ class SpawriousBenchmark_JTT(MultipleDomainDataset):
         self.type1 = type1
         train_datasets, test_datasets = self._prepare_data_lists(train_combinations, test_combinations, root_dir, augment)
         self.datasets = [ConcatDataset(test_datasets)] + train_datasets
+        print('\nCreating domain adaptation dataset (very quick)\n')
         self.domain_adaptation_ds = ConcatDataset(self._prepare_data_lists_for_domain_adaptation(test_combinations, root_dir, augment))
 
     # Prepares the train and test data lists by applying the necessary transformations.
@@ -704,14 +703,13 @@ class SpawriousBenchmark_JTT(MultipleDomainDataset):
         else:
             train_transforms = test_transforms
 
-        print("\nCreating training data list:\n")
-        train_data_list = self._create_data_list(train_combinations, root_dir, train_transforms)
-        print("\nCreating testing data list:\n")
+        print("\nCreating training data lists (2 lists * 4 classes)\n\n")
+        train_data_list = self._create_data_list(train_combinations, root_dir, train_transforms, training=True)
         test_data_list = self._create_data_list(test_combinations, root_dir, test_transforms)
 
         return train_data_list, test_data_list
 
-    def _create_data_list(self, combinations, root_dir, transforms, misclassifications=None):
+    def _create_data_list(self, combinations, root_dir, transforms, training=False):
         # Modify this function to use TripletImageFolder
         data_list = []
         if isinstance(combinations, dict):
@@ -721,7 +719,7 @@ class SpawriousBenchmark_JTT(MultipleDomainDataset):
             class_idx = 0
             for classes, comb_list in combinations.items():
                 class_idx += 1
-                print('Class index', class_idx, ' out of', len(combinations))
+                print('\tclass index', class_idx, ' out of', len(combinations))
                 for_each_class_group.append([])
                 for ind, location_limit in enumerate(comb_list):
                     if isinstance(location_limit, tuple):
@@ -731,7 +729,10 @@ class SpawriousBenchmark_JTT(MultipleDomainDataset):
                     cg_data_list = []
                     for cls in classes:
                         path = os.path.join(root_dir, f"{0 if not self.type1 else ind}/{location}/{cls}")
-                        data = CustomImageFolder(folder_path=path, class_index=self.class_list.index(cls), transform=transforms, triplet=True, model_dict=self.model_dict, model_architecture=self.model_architecture, device=self.device)
+                        if training:
+                            data = CustomImageFolder(folder_path=path, class_index=self.class_list.index(cls), transform=transforms, triplet=True, model_dict=self.model_dict, model_architecture=self.model_architecture, device=self.device)
+                        else:
+                            data = CustomImageFolder(folder_path=path, class_index=self.class_list.index(cls), transform=transforms)
                         cg_data_list.append(data)
 
                     for_each_class_group[cg_index].append(ConcatDataset(cg_data_list))

@@ -27,10 +27,12 @@ import pickle
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Domain generalization')
     parser.add_argument('--data_dir', type=str)
-    parser.add_argument('--dataset', type=str, default="RotatedMNIST")
+    parser.add_argument('--dataset', type=str)
     parser.add_argument('--algorithm', type=str, default="ERM")
     parser.add_argument('--pretrained_model_path', type=str, default=None, 
                         help='Path to pretrained model pkl file, in the format saved by the save checkpoint function.')
+    # TODO: make upweight a hparam.
+    parser.add_argument('--upweight', type=float, default=1.0, help='How much to upweight the misclassifications in the JTT loss. ')
     parser.add_argument('--task', type=str, default="domain_generalization",
         choices=["domain_generalization", "domain_adaptation"])
     parser.add_argument('--hparams', type=str,
@@ -48,7 +50,7 @@ if __name__ == "__main__":
     # TODO: remove this after testing is done
     parser.add_argument('--retrain_steps', type=int, default=100,
         help='Number of layer retraining steps if using FLR or LLR.')
-    parser.add_argument('--checkpoint_freq', type=int, default=None,
+    parser.add_argument('--checkpoint_freq', type=int, default=20,
         help='Checkpoint every N steps. Default is dataset-dependent.')
     parser.add_argument('--test_envs', type=int, nargs='+', default=[0])
     parser.add_argument('--output_dir', type=str, default="train_output")
@@ -63,7 +65,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # TODO: remove this after testing is done
-    args.task = "domain_generalization"
     args.dataset = "SpawriousM2M_easy_JTT"
     args.algorithm = "JTT"
     args.data_dir = "/home/aengusl/Desktop/Projects/OOD_workshop/DomainBed-SP/data/spawrious224"
@@ -114,7 +115,6 @@ if __name__ == "__main__":
             dataset = vars(datasets)[args.dataset](args.data_dir,
                 args.test_envs, hparams)
         else:
-            print('Using JTT dataset.')
             assert args.pretrained_model_path is not None
             # Load the pkl file at path domainbed/ERM_model_temp/model_step1.pkl
             # save_dict = torch.load(os.path.join('./domainbed/ERM_model_temp', f'model_step1.pkl'))
@@ -234,7 +234,7 @@ if __name__ == "__main__":
                 len(dataset) - len(args.test_envs), hparams)
         else:
             algorithm = algorithm_class(dataset.input_shape, dataset.num_classes,
-                len(dataset) - len(args.test_envs), hparams, upweight=1.0)
+                len(dataset) - len(args.test_envs), hparams, upweight=args.upweight)
 
         if algorithm_dict is not None:
             print('Loading model from previous checkpoint.')
@@ -243,7 +243,8 @@ if __name__ == "__main__":
         algorithm.to(device)
 
         train_minibatches_iterator = zip(*train_loaders)
-        uda_minibatches_iterator = zip(*uda_loaders)
+        if args.task == "domain_adaptation":
+            uda_minibatches_iterator = zip(*uda_loaders)
         checkpoint_vals = collections.defaultdict(lambda: [])
 
         steps_per_epoch = min([len(env)/hparams['batch_size'] for env,_ in in_splits])
