@@ -45,7 +45,7 @@ if __name__ == "__main__":
     parser.add_argument('--seed', type=int, default=0,
         help='Seed for everything else')
     # TODO: remove this after testing is done
-    parser.add_argument('--steps', type=int, default=1,
+    parser.add_argument('--steps', type=int, default=None,
         help='Number of steps. Default is dataset-dependent.')
     # TODO: remove this after testing is done
     parser.add_argument('--retrain_steps', type=int, default=100,
@@ -96,6 +96,12 @@ if __name__ == "__main__":
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
 
+
+    # TODO: remove this after testing is done
+    # args.pretrained_model_path = "/home/aengusl/Desktop/Projects/OOD_workshop/DomainBed-SP/erm_output/resnet50_SpawriousM2M_easy_ERM_model.pkl"
+    # args.dataset = "SpawriousM2M_easy_JTT"
+    # args.data_dir = "/home/aengusl/Desktop/Projects/OOD_workshop/DomainBed-SP/data/spawrious224"
+
     jtt_bool = args.dataset.endswith("JTT")
 
     if torch.cuda.is_available():
@@ -103,6 +109,7 @@ if __name__ == "__main__":
         print("Using device {}.".format(device))
     else:
         device = "cpu"
+
 
     if args.dataset in vars(datasets):
         if not jtt_bool:
@@ -113,10 +120,9 @@ if __name__ == "__main__":
             # Load the pkl file at path domainbed/ERM_model_temp/model_step1.pkl
             # save_dict = torch.load(os.path.join('./domainbed/ERM_model_temp', f'model_step1.pkl'))
             save_dict = torch.load(args.pretrained_model_path)
-            model_architecture = save_dict['model_hparams']['arch']
             model_dict = save_dict['model_dict']
             dataset = vars(datasets)[args.dataset](args.data_dir,
-                args.test_envs, hparams, model_dict=model_dict, model_architecture=hparams['arch'], device=device)
+                args.test_envs, hparams, device=device, model_path=args.pretrained_model_path)
             algorithm_dict = model_dict
     else:
         raise NotImplementedError

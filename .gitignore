@@ -1,6 +1,6 @@
 __pycache__
 domainbed/facebook.py
-
+saliency_maps/
 domainbed/data/*
 train_output/*
 search_output/*

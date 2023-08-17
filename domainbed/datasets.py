@@ -11,7 +11,7 @@ from tqdm import tqdm
 
 from wilds.datasets.camelyon17_dataset import Camelyon17Dataset
 from wilds.datasets.fmow_dataset import FMoWDataset
-
+from domainbed import algorithms
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 DATASETS = [
@@ -368,7 +368,7 @@ class CustomImageFolder(Dataset):
     """
     A class that takes one folder at a time and loads a set number of images in a folder and assigns them a specific class
     """
-    def __init__(self, folder_path, class_index, limit=None, transform=None, triplet=False, model_dict=None, model_architecture=None, device=None):
+    def __init__(self, folder_path, class_index, limit=None, transform=None, triplet=False, device=None, model_path=None):
         self.folder_path = folder_path
         self.class_index = class_index
         self.image_paths = [os.path.join(folder_path, img) for img in os.listdir(folder_path) if img.endswith(('.png', '.jpg', '.jpeg'))]
@@ -378,8 +378,7 @@ class CustomImageFolder(Dataset):
         self.triplet = triplet
 
         if triplet:
-            assert model_dict is not None, "model dict must be provided for misclassification"
-            assert model_architecture is not None, "Model architecture must be provided for misclassification"
+            assert model_path is not None, "Model path must be provided for misclassification"
             assert device is not None, "Device must be provided for misclassification"
             
             input_shape = (3, 224, 224)
@@ -388,21 +387,24 @@ class CustomImageFolder(Dataset):
                 transforms.transforms.ToTensor(),
                 transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
                 ])
-            if model_architecture == "resnet18":
-                model = torchvision.models.resnet18(weights=model_dict)
-            elif model_architecture == "resnet50":
-                model = torchvision.models.resnet50(weights=model_dict)
-            else:
-                raise NotImplementedError("Model architecture not implemented")
-            model.to(device)
             label = torch.tensor(self.class_index, dtype=torch.long)
             misclassifications = [0] * len(self.image_paths)
+            model_dict = torch.load(model_path)["model_dict"]
+            hparams = torch.load(model_path)["model_hparams"]
+            erm_model = algorithms.ERM(
+                input_shape=torch.Size([3, 224, 224]),  # input shape
+                    num_classes=4,  # number of classes
+                    hparams=hparams,  # hparams
+                    num_domains=1,  # number of training domains
+            )
+            erm_model.load_state_dict(model_dict)
+            erm_model.to(device)
 
             print("\t\tComputing misclassifications...")
             for idx, image_path in tqdm(enumerate(self.image_paths)):
                 image = Image.open(image_path).convert('RGB')
                 image = test_transforms(image).to(device).unsqueeze(0)
-                output = model(image)
+                output = erm_model.network(image)
                 _, predicted = output.max(1)
                 if predicted != label:
                     misclassifications[idx] = 1
@@ -668,14 +670,12 @@ class SpawriousBenchmark_JTT(MultipleDomainDataset):
     num_classes = 4
     class_list = ["bulldog", "corgi", "dachshund", "labrador"]
 
-    def __init__(self, train_combinations, test_combinations, root_dir, augment=True, type1=False, model_dict=None, model_architecture=None, device=None):
-        assert model_dict is not None, "Path to saved model must be provided for misclassification"
-        assert model_architecture is not None, "Model architecture must be provided for misclassification"
+    def __init__(self, train_combinations, test_combinations, root_dir, augment=True, type1=False, device=None, model_path=None):
+        assert model_path is not None, "Path to saved model must be provided for misclassification"
         assert device is not None, "Device must be provided for misclassification"
 
-        self.model_dict = model_dict
-        self.model_architecture = model_architecture
         self.device = device
+        self.model_path = model_path
 
         self.type1 = type1
         train_datasets, test_datasets = self._prepare_data_lists(train_combinations, test_combinations, root_dir, augment)
@@ -730,7 +730,7 @@ class SpawriousBenchmark_JTT(MultipleDomainDataset):
                     for cls in classes:
                         path = os.path.join(root_dir, f"{0 if not self.type1 else ind}/{location}/{cls}")
                         if training:
-                            data = CustomImageFolder(folder_path=path, class_index=self.class_list.index(cls), transform=transforms, triplet=True, model_dict=self.model_dict, model_architecture=self.model_architecture, device=self.device)
+                            data = CustomImageFolder(folder_path=path, class_index=self.class_list.index(cls), transform=transforms, triplet=True, device=self.device, model_path=self.model_path,)
                         else:
                             data = CustomImageFolder(folder_path=path, class_index=self.class_list.index(cls), transform=transforms)
                         cg_data_list.append(data)
@@ -794,7 +794,7 @@ class SpawriousBenchmark_JTT(MultipleDomainDataset):
                     cg_data_list = []
                     for cls in classes:
                         path = os.path.join(root_dir, f"domain_adaptation_ds/{location}/{cls}")
-                        data = CustomImageFolder(folder_path=path, class_index=self.class_list.index(cls), transform=transforms, triplet=True, model_dict=self.model_dict, model_architecture=self.model_architecture, device=self.device)
+                        data = CustomImageFolder(folder_path=path, class_index=self.class_list.index(cls), transform=transforms, triplet=True, device=self.device, model_path=self.model_path)
                         cg_data_list.append(data)
                     
                     for_each_class_group[cg_index].append(ConcatDataset(cg_data_list))
@@ -859,49 +859,49 @@ class SpawriousBenchmark_JTT(MultipleDomainDataset):
 
 ## Spawrious classes for each Spawrious dataset 
 class SpawriousO2O_easy_JTT(SpawriousBenchmark_JTT):
-    def __init__(self, root_dir, test_envs, hparams, model_dict=None, model_architecture=None, device=None):
+    def __init__(self, root_dir, test_envs, hparams, model_path=None, device=None):
         group = ["desert","jungle","dirt","snow"]
         test = ["dirt","snow","desert","jungle"]
         filler = "beach"
         combinations = self.build_type1_combination(group,test,filler)
         print('\nrunning the spawrious o2o easy jtt dataset\n')
-        super().__init__(combinations['train_combinations'], combinations['test_combinations'], root_dir, hparams['data_augmentation'], type1=True, model_dict=model_dict, model_architecture=model_architecture, device=device)
+        super().__init__(combinations['train_combinations'], combinations['test_combinations'], root_dir, hparams['data_augmentation'], type1=True, model_path=model_path, device=device)
 
 class SpawriousO2O_medium_JTT(SpawriousBenchmark_JTT):
-    def __init__(self, root_dir, test_envs, hparams, model_dict=None, model_architecture=None, device=None):    
+    def __init__(self, root_dir, test_envs, hparams, model_path=None, device=None):    
         group = ['mountain', 'beach', 'dirt', 'jungle']
         test = ['jungle', 'dirt', 'beach', 'snow']
         filler = "desert"
         combinations = self.build_type1_combination(group,test,filler)
-        super().__init__(combinations['train_combinations'], combinations['test_combinations'], root_dir, hparams['data_augmentation'], type1=True, model_dict=model_dict, model_architecture=model_architecture, device=device)
+        super().__init__(combinations['train_combinations'], combinations['test_combinations'], root_dir, hparams['data_augmentation'], type1=True, model_path=model_path, device=device)
 
 class SpawriousO2O_hard_JTT(SpawriousBenchmark_JTT):
-    def __init__(self, root_dir, test_envs, hparams, model_dict=None, model_architecture=None, device=None):    
+    def __init__(self, root_dir, test_envs, hparams, model_path=None, device=None):    
         group = ['jungle', 'mountain', 'snow', 'desert']
         test = ['mountain', 'snow', 'desert', 'jungle']
         filler = "beach"
         combinations = self.build_type1_combination(group,test,filler)
-        super().__init__(combinations['train_combinations'], combinations['test_combinations'], root_dir, hparams['data_augmentation'], type1=True, model_dict=model_dict, model_architecture=model_architecture, device=device)
+        super().__init__(combinations['train_combinations'], combinations['test_combinations'], root_dir, hparams['data_augmentation'], type1=True, model_path=model_path, device=device)
 
 class SpawriousM2M_easy_JTT(SpawriousBenchmark_JTT):
-    def __init__(self, root_dir, test_envs, hparams, model_dict=None, model_architecture=None, device=None):    
+    def __init__(self, root_dir, test_envs, hparams, model_path=None, device=None):    
         group = ['desert', 'mountain', 'dirt', 'jungle']
         test = ['dirt', 'jungle', 'mountain', 'desert']
         combinations = self.build_type2_combination(group,test)
-        super().__init__(combinations['train_combinations'], combinations['test_combinations'], root_dir, hparams['data_augmentation'], type1=True, model_dict=model_dict, model_architecture=model_architecture, device=device)
+        super().__init__(combinations['train_combinations'], combinations['test_combinations'], root_dir, hparams['data_augmentation'], type1=True, model_path=model_path, device=device)
 
 class SpawriousM2M_medium_JTT(SpawriousBenchmark_JTT):
-    def __init__(self, root_dir, test_envs, hparams, model_dict=None, model_architecture=None, device=None):    
+    def __init__(self, root_dir, test_envs, hparams, model_path=None, device=None):    
         group = ['beach', 'snow', 'mountain', 'desert']
         test = ['desert', 'mountain', 'beach', 'snow']
         combinations = self.build_type2_combination(group,test)
-        super().__init__(combinations['train_combinations'], combinations['test_combinations'], root_dir, hparams['data_augmentation'], type1=True, model_dict=model_dict, model_architecture=model_architecture, device=device)
+        super().__init__(combinations['train_combinations'], combinations['test_combinations'], root_dir, hparams['data_augmentation'], type1=True, model_path=model_path, device=device)
         
 class SpawriousM2M_hard_JTT(SpawriousBenchmark_JTT):
     ENVIRONMENTS = ["Test","SC_group_1","SC_group_2"]
-    def __init__(self, root_dir, test_envs, hparams, model_dict=None, model_architecture=None, device=None):    
+    def __init__(self, root_dir, test_envs, hparams, model_path=None, device=None):    
         group = ["dirt","jungle","snow","beach"]
         test = ["snow","beach","dirt","jungle"]
         combinations = self.build_type2_combination(group,test)
-        super().__init__(combinations['train_combinations'], combinations['test_combinations'], root_dir, hparams['data_augmentation'], type1=True, model_dict=model_dict, model_architecture=model_architecture, device=device)
+        super().__init__(combinations['train_combinations'], combinations['test_combinations'], root_dir, hparams['data_augmentation'], type1=True, model_path=model_path, device=device)
 
