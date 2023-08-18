@@ -171,7 +171,7 @@ class JTT(Algorithm):
         all_y = torch.cat([y for x, y, w in minibatches])
         all_w = torch.cat([w for x, y, w in minibatches])
         loss = F.cross_entropy(self.predict(all_x), all_y, reduction='none')
-        jtt_loss = torch.mean(( 1 + self.upweight * all_w ) * loss)
+        jtt_loss = torch.mean(( 1 + (self.upweight-1) * all_w ) * loss)
 
         self.optimizer.zero_grad()
         jtt_loss.backward()
