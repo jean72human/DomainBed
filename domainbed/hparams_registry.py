@@ -65,6 +65,10 @@ def _hparams(algorithm, dataset, random_seed):
     elif algorithm == "Mixup":
         _hparam('mixup_alpha', 0.2, lambda r: 10**r.uniform(-1, -1))
 
+    elif algorithm == "CutMix":
+        _hparam('cutmix_beta', 1.0, lambda r: 10**r.uniform(-1, -1))
+        _hparam('cutmix_prob', 0.5, lambda r: r.uniform(0, 1))
+
     elif algorithm == "GroupDRO":
         _hparam('groupdro_eta', 1e-2, lambda r: 10**r.uniform(-3, -1))
 

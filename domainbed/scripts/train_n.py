@@ -28,7 +28,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Domain generalization')
     parser.add_argument('--data_dir', type=str)
     parser.add_argument('--dataset', type=str)
-    parser.add_argument('--algorithm', type=str, default="ERM")
+    # TODO: remove this after testing is done
+    parser.add_argument('--algorithm', type=str, default="CutMix")
     parser.add_argument('--pretrained_model_path', type=str, default=None, 
                         help='Path to pretrained model pkl file, in the format saved by the save checkpoint function.')
     # TODO: make upweight a hparam.
@@ -98,9 +99,9 @@ if __name__ == "__main__":
 
 
     # TODO: remove this after testing is done
-    # args.pretrained_model_path = "/home/aengusl/Desktop/Projects/OOD_workshop/DomainBed-SP/erm_output/resnet50_SpawriousM2M_easy_ERM_model.pkl"
-    # args.dataset = "SpawriousM2M_easy_JTT"
-    # args.data_dir = "/home/aengusl/Desktop/Projects/OOD_workshop/DomainBed-SP/data/spawrious224"
+    args.pretrained_model_path = "/home/aengusl/Desktop/Projects/OOD_workshop/DomainBed-SP/erm_output/resnet50_SpawriousM2M_easy_ERM_model.pkl"
+    args.dataset = "SpawriousM2M_easy"
+    args.data_dir = "/home/aengusl/Desktop/Projects/OOD_workshop/DomainBed-SP/data/spawrious224"
 
     jtt_bool = args.dataset.endswith("JTT")
 

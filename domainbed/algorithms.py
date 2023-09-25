@@ -54,6 +54,7 @@ ALGORITHMS = [
     'FLR',
     'LLR',
     'JTT',
+    'CutMix',
 ]
 
 def get_algorithm_class(algorithm_name):
@@ -607,6 +608,70 @@ class Mixup(ERM):
         self.optimizer.step()
 
         return {'loss': objective.item()}
+
+
+class CutMix(ERM):
+    """
+    Aengus' implementation of the CutMix algorithm - 25/09/2023
+    https://arxiv.org/abs/1905.04899
+    """
+    def __init__(self, input_shape, num_classes, num_domains, hparams):
+        super(CutMix, self).__init__(input_shape, num_classes, num_domains,
+                                    hparams)
+    
+    def update(self, minibatches, unlabeled=None):
+
+        def rand_bbox(size, lam):
+            W = size[2]
+            H = size[3]
+            cut_rat = np.sqrt(1. - lam)
+            cut_w = int(W * cut_rat)
+            cut_h = int(H * cut_rat)
+
+            # uniform
+            cx = np.random.randint(W)
+            cy = np.random.randint(H)
+
+            bbx1 = np.clip(cx - cut_w // 2, 0, W)
+            bby1 = np.clip(cy - cut_h // 2, 0, H)
+            bbx2 = np.clip(cx + cut_w // 2, 0, W)
+            bby2 = np.clip(cy + cut_h // 2, 0, H)
+
+            return bbx1, bby1, bbx2, bby2
+        
+        # all_x = [x for x, y in minibatches]
+        # all_y = [y for x, y in minibatches]
+        for x, y in minibatches:
+
+            x  = x.cuda()
+            y = y.cuda()
+
+            r = np.random.rand(1)
+            if r < self.hparams["cutmix_prob"]:
+
+                lam = np.random.beta(self.hparams["cutmix_beta"],
+                                        self.hparams["cutmix_beta"])
+                rand_index = torch.randperm(x.size()[0]).cuda()
+                target_a = y
+                target_b = y[rand_index]
+                bbx1, bby1, bbx2, bby2 = rand_bbox(x.size(), lam)
+                x[:, :, bbx1:bbx2, bby1:bby2] = x[rand_index, :, bbx1:bbx2, bby1:bby2]
+                # adjust lambda to exactly match pixel ratio
+                lam = 1 - ((bbx2 - bbx1) * (bby2 - bby1) / (x.size()[-1] * x.size()[-2]))
+                # compute output
+                output = self.network(x)
+                loss = F.cross_entropy(output, target_a) * lam + F.cross_entropy(output, target_b) * (1. - lam)
+
+            else:
+                output = self.network(x)
+                loss = F.cross_entropy(output, y)
+
+            self.optimizer.zero_grad()
+            loss.backward()
+            self.optimizer.step()
+        
+        return {'loss': loss.item()}
+
 
 
 class GroupDRO(ERM):
