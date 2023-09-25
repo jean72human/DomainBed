@@ -26,7 +26,7 @@ ALGORITHMS = [
     'Fish',
     'IRM',
     'GroupDRO',
-    'Mixup',
+    'dsMixup',
     'MLDG',
     'CORAL',
     'MMD',

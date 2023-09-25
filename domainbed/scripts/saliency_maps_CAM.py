@@ -127,38 +127,38 @@ save_dir = "/home/aengusl/Desktop/Projects/OOD_workshop/DomainBed-SP/data/miscla
 os.makedirs(save_dir, exist_ok=True)
 
 
-print("\t\tComputing misclassifications...")
-for idx, image_path in enumerate(image_paths):
-    pil_image = Image.open(image_path).convert('RGB')
-    image = test_transforms(pil_image).to('cuda').unsqueeze(0)
-    output = erm_model.network(image)
-    _, predicted = output.max(1)
+# print("\t\tComputing misclassifications...")
+# for idx, image_path in enumerate(image_paths):
+#     pil_image = Image.open(image_path).convert('RGB')
+#     image = test_transforms(pil_image).to('cuda').unsqueeze(0)
+#     output = erm_model.network(image)
+#     _, predicted = output.max(1)
 
-    if predicted != label:
-        misclassifications[idx] = 1
+#     if predicted != label:
+#         misclassifications[idx] = 1
         
-        if predicted == class_list.index('labrador'):
-            misclassification_count += 1
-            print("\n\nLabrador misclassification found!")
-            # Retrieve the CAM by passing the class index and the model output
-            erm_model = algorithms.ERM(
-                input_shape=torch.Size([3, 224, 224]),  # input shape
-                    num_classes=4,  # number of classes
-                    hparams=hparams,  # hparams
-                    num_domains=1,  # number of training domains
-            )
-            erm_model.load_state_dict(model_dict)
-            for param in erm_model.parameters():
-                param.requires_grad = True
-            erm_model.to('cuda')
-            cam_extractor = SmoothGradCAMpp(erm_model.network)
-            output = erm_model.network(image)
-            activation_map = cam_extractor(class_list.index('labrador'), output)
-            result = overlay_mask(pil_image, to_pil_image(activation_map[0].squeeze(0), mode='F'), alpha=0.5)
-            plt.imshow(result); plt.axis('off'); plt.tight_layout(); plt.show()
-            # save image
-            pil_image.save(os.path.join(save_dir,f"original_labrador_as_bulldog{misclassification_count}.png"))
-            result.save(os.path.join(save_dir,f"saliency_bulldog_as_labrador{misclassification_count}.png"))
+#         if predicted == class_list.index('labrador'):
+#             misclassification_count += 1
+#             print("\n\nLabrador misclassification found!")
+#             # Retrieve the CAM by passing the class index and the model output
+#             erm_model = algorithms.ERM(
+#                 input_shape=torch.Size([3, 224, 224]),  # input shape
+#                     num_classes=4,  # number of classes
+#                     hparams=hparams,  # hparams
+#                     num_domains=1,  # number of training domains
+#             )
+#             erm_model.load_state_dict(model_dict)
+#             for param in erm_model.parameters():
+#                 param.requires_grad = True
+#             erm_model.to('cuda')
+#             cam_extractor = SmoothGradCAMpp(erm_model.network)
+#             output = erm_model.network(image)
+#             activation_map = cam_extractor(class_list.index('labrador'), output)
+#             result = overlay_mask(pil_image, to_pil_image(activation_map[0].squeeze(0), mode='F'), alpha=0.5)
+#             plt.imshow(result); plt.axis('off'); plt.tight_layout(); plt.show()
+#             # save image
+#             pil_image.save(os.path.join(save_dir,f"original_labrador_as_bulldog{misclassification_count}.png"))
+#             result.save(os.path.join(save_dir,f"saliency_bulldog_as_labrador{misclassification_count}.png"))
 
 
 # ------------------------------------------
@@ -185,7 +185,7 @@ test_transforms = transforms.Compose([
     transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
     ])
 label = torch.tensor(class_list.index('bulldog'), dtype=torch.long)
-misclassifications = [0] * len(image_paths)
+misclassifications = [0] * len(dachshund_image_paths)
 
 model_dict = torch.load(o2o_hard_model_path)["model_dict"]
 hparams = torch.load(o2o_hard_model_path)["model_hparams"]

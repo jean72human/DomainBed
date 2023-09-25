@@ -224,11 +224,11 @@ hparams_dict["SpawriousM2M_medium"] = hparams_dict["SpawriousM2M_hard"]
 
 for arch in ["resnet50"]:
     for algo in ["JTT"]:
-        for dataset in ["SpawriousO2O_hard"]:
-            for upweight in [50]:
+        for dataset in ["SpawriousO2O_hard","SpawriousM2M_hard"]:
+            for upweight in [80]:
                 jtt_path = "./erm_output/resnet50_"+dataset+"_ERM_model.pkl"
                 dataset_jtt = dataset+"_JTT"
                 hparams = hparams_dict[dataset][algo].replace("batchsize", str(batch_size)).replace("archused", arch)
                 hparams = hparams.replace("\n", "").replace(" ", "")
                 print(f"Train {algo} on {dataset}")
-                os.system(f"""python3 -m domainbed.scripts.train_n --data_dir={data_dir}  --algorithm {algo} --test_env 0 --dataset {dataset_jtt} --pretrained_model_path {jtt_path} --upweight {upweight} --hparams='{hparams}' --seed {args.seed} --output_dir jtt_output --n_iter 1""")
+                os.system(f"""python3 -m domainbed.scripts.train_n --data_dir={data_dir}  --algorithm {algo} --test_env 0 --dataset {dataset_jtt} --pretrained_model_path {jtt_path} --upweight {upweight} --hparams='{hparams}' --seed {args.seed} --output_dir jtt_output2 --n_iter 3""")
