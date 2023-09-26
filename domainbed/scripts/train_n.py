@@ -28,8 +28,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Domain generalization')
     parser.add_argument('--data_dir', type=str)
     parser.add_argument('--dataset', type=str)
-    # TODO: remove this after testing is done
-    parser.add_argument('--algorithm', type=str, default="CutMix")
+    parser.add_argument('--algorithm', type=str, default="ERM")
     parser.add_argument('--pretrained_model_path', type=str, default=None, 
                         help='Path to pretrained model pkl file, in the format saved by the save checkpoint function.')
     # TODO: make upweight a hparam.
@@ -62,6 +61,8 @@ if __name__ == "__main__":
     parser.add_argument('--skip_model_save', action='store_true')
     parser.add_argument('--save_model_every_checkpoint', action='store_true')
     parser.add_argument('--n_iter', type=int, default=1)
+    parser.add_argument('--mix_strategy', type=str, default='LISA')
+    parser.add_argument('--mix_interpolation', type=str, default='CutMix')
     
     args = parser.parse_args()
 
@@ -102,6 +103,7 @@ if __name__ == "__main__":
     args.pretrained_model_path = "/home/aengusl/Desktop/Projects/OOD_workshop/DomainBed-SP/erm_output/resnet50_SpawriousM2M_easy_ERM_model.pkl"
     args.dataset = "SpawriousM2M_easy"
     args.data_dir = "/home/aengusl/Desktop/Projects/OOD_workshop/DomainBed-SP/data/spawrious224"
+    args.algorithm = "CutMix"
 
     jtt_bool = args.dataset.endswith("JTT")
 
@@ -296,6 +298,8 @@ if __name__ == "__main__":
                 else:
                     print("Retraining...")
                     step_vals = algorithm.update(minibatches_device, uda_device, retrain=True)
+            elif args.algorithm == "CutMix":
+                step_vals = algorithm.update(minibatches=minibatches_device, unlabeled=uda_device, mix_strategy=args.mix_strategy, mix_interpolation=args.mix_interpolation)
             else:
                 step_vals = algorithm.update(minibatches_device, uda_device)
 

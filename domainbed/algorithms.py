@@ -613,13 +613,22 @@ class Mixup(ERM):
 class CutMix(ERM):
     """
     Aengus' implementation of the CutMix algorithm - 25/09/2023
+
+    Have also included mixup as an argument to this code to make it easier to run both. This class runs
+    - Lisa (CutMix or Mixup)
+    - Random Shuffle (CutMix or Mixup)
+
+    args:
+    - mix_strategy ('LISA' or 'random_shuffle')
+    - mix_interpolation ('CutMix' or 'Mixup')
+
     https://arxiv.org/abs/1905.04899
     """
     def __init__(self, input_shape, num_classes, num_domains, hparams):
         super(CutMix, self).__init__(input_shape, num_classes, num_domains,
                                     hparams)
     
-    def update(self, minibatches, unlabeled=None):
+    def update(self, minibatches, unlabeled=None, mix_strategy="random_shuffle", mix_interpolation="Mixup"):
 
         def rand_bbox(size, lam):
             W = size[2]
@@ -639,36 +648,128 @@ class CutMix(ERM):
 
             return bbx1, bby1, bbx2, bby2
         
-        # all_x = [x for x, y in minibatches]
-        # all_y = [y for x, y in minibatches]
-        for x, y in minibatches:
+        all_x = torch.cat([x for x, y in minibatches])
+        all_y = torch.cat([y for x, y in minibatches])
+        all_x = all_x.cuda()
+        all_y = all_y.cuda()
 
-            x  = x.cuda()
-            y = y.cuda()
+        loss = 0
 
-            r = np.random.rand(1)
-            if r < self.hparams["cutmix_prob"]:
+        if mix_strategy == "LISA": 
+            # Either mix two different environments with the same label, or mix two different labels from the same environment
 
-                lam = np.random.beta(self.hparams["cutmix_beta"],
-                                        self.hparams["cutmix_beta"])
-                rand_index = torch.randperm(x.size()[0]).cuda()
-                target_a = y
-                target_b = y[rand_index]
-                bbx1, bby1, bbx2, bby2 = rand_bbox(x.size(), lam)
-                x[:, :, bbx1:bbx2, bby1:bby2] = x[rand_index, :, bbx1:bbx2, bby1:bby2]
-                # adjust lambda to exactly match pixel ratio
-                lam = 1 - ((bbx2 - bbx1) * (bby2 - bby1) / (x.size()[-1] * x.size()[-2]))
-                # compute output
+            # TODO: make hparam
+            strategy = np.random.binomial(1, 0.5)
+
+            env_lens = [len(x) for x, y in minibatches]
+            all_e = torch.zeros(len(all_x))
+            all_e[:env_lens[0]] = 0
+            counter = env_lens[0]
+            for i in range(1, len(env_lens)):
+                all_e[counter : counter + env_lens[i]] = i
+                counter += env_lens[i]
+
+            indices = list(range(len(all_x)))
+            shuffled_indices = list(np.random.permutation(indices))
+
+            B1_indices, B2_indices = [], []
+            while len(shuffled_indices) > 0:
+
+                b1_idx = shuffled_indices.pop()
+
+                for i in range(len(shuffled_indices)):
+                    b2_idx = shuffled_indices[i]
+
+                    if strategy == 0:
+                        # Different environments, same label
+
+                        if all_e[b1_idx] != all_e[b2_idx] and all_y[b1_idx] == all_y[b2_idx]:
+                            B1_indices.append(b1_idx)
+                            B2_indices.append(b2_idx)
+                            shuffled_indices.pop(i)
+                            break
+                    
+                    else:
+                        # Same environment, different labels
+
+                        if all_e[b1_idx] == all_e[b2_idx] and all_y[b1_idx] != all_y[b2_idx]:
+                            B1_indices.append(b1_idx)
+                            B2_indices.append(b2_idx)
+                            shuffled_indices.pop(i)
+                            break
+
+            # Create B1 and B2 tensors from all_x and all_y
+            B1_x = all_x[B1_indices]
+            B1_y = all_y[B1_indices]
+            B2_x = all_x[B2_indices]
+            B2_y = all_y[B2_indices]
+
+        elif mix_strategy == "random_shuffle":
+            # Get the whole batch, shuffle it randomly, and then split it in half to get B1 and B2
+
+            indices = list(range(len(all_x)))
+            shuffled_indices = list(np.random.permutation(indices))
+
+            midpoint = len(shuffled_indices)//2
+            B1_indices = shuffled_indices[:midpoint]
+            B2_indices = shuffled_indices[midpoint:2*midpoint]
+
+            # Create B1 and B2 tensors from all_x and all_y
+            B1_x = all_x[B1_indices]
+            B1_y = all_y[B1_indices]
+            B2_x = all_x[B2_indices]
+            B2_y = all_y[B2_indices]
+
+        else: 
+            raise ValueError("Invalid mix strategy.")
+        
+        # TODO: make hparam
+        # lam = np.random.beta(self.hparams["cutmix_beta"], self.hparams["cutmix_beta"])
+        lam = np.random.beta(1, 1)
+
+        if mix_interpolation == "CutMix":
+            r = np.random.randn(1)
+            # TODO: make hparam
+            # if r < self.hparams["cutmix_prob"]:
+            if r < 0.5:
+
+                target_a = B1_y
+                target_b = B2_y
+                bbx1, bby1, bbx2, bby2 = rand_bbox(B1_x.size(), lam)
+
+                # B1_x is foreground, B2_x is inserted box
+                x = B1_x.clone().cuda()
+                x[:, :, bbx1:bbx2, bby1:bby2] = B2_x[:, :, bbx1:bbx2, bby1:bby2]
+                lam = 1 - ((bbx2 - bbx1) * (bby2 - bby1) / (B1_x.size()[-1] * B1_x.size()[-2]))
                 output = self.network(x)
-                loss = F.cross_entropy(output, target_a) * lam + F.cross_entropy(output, target_b) * (1. - lam)
+                env_loss = F.cross_entropy(output, target_a) * lam + F.cross_entropy(output, target_b) * (1. - lam)
+
+                # B2_x is foreground, B1_x is inserted box
+                x = B2_x.clone().cuda()
+                x[:, :, bbx1:bbx2, bby1:bby2] = B1_x[:, :, bbx1:bbx2, bby1:bby2]
+                lam = 1 - ((bbx2 - bbx1) * (bby2 - bby1) / (B1_x.size()[-1] * B1_x.size()[-2]))
+                output = self.network(x)
+                env_loss += F.cross_entropy(output, target_b) * lam + F.cross_entropy(output, target_a) * (1. - lam)
 
             else:
-                output = self.network(x)
-                loss = F.cross_entropy(output, y)
+                output = self.network(all_x)
+                env_loss = F.cross_entropy(output, all_y)
 
-            self.optimizer.zero_grad()
-            loss.backward()
-            self.optimizer.step()
+        elif mix_interpolation == "Mixup":
+
+            x = lam * B1_x + (1 - lam) * B2_x
+            target_a = B1_y
+            target_b = B2_y
+            output = self.network(x)
+            env_loss = F.cross_entropy(output, target_a) * lam + F.cross_entropy(output, target_b) * (1. - lam)
+
+        else:
+            raise ValueError("Invalid mix interpolation.")
+            
+        loss += env_loss
+        self.optimizer.zero_grad()
+        loss.backward()
+        self.optimizer.step()
         
         return {'loss': loss.item()}
 
