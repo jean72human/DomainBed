@@ -100,10 +100,10 @@ if __name__ == "__main__":
 
 
     # TODO: remove this after testing is done
-    args.pretrained_model_path = "/home/aengusl/Desktop/Projects/OOD_workshop/DomainBed-SP/erm_output/resnet50_SpawriousM2M_easy_ERM_model.pkl"
-    args.dataset = "SpawriousM2M_easy"
-    args.data_dir = "/home/aengusl/Desktop/Projects/OOD_workshop/DomainBed-SP/data/spawrious224"
-    args.algorithm = "CutMix"
+    # args.pretrained_model_path = "/home/aengusl/Desktop/Projects/OOD_workshop/DomainBed-SP/erm_output/resnet50_SpawriousM2M_easy_ERM_model.pkl"
+    # args.dataset = "SpawriousM2M_easy"
+    # args.data_dir = "/home/aengusl/Desktop/Projects/OOD_workshop/DomainBed-SP/data/spawrious224"
+    # args.algorithm = "CutMix"
 
     jtt_bool = args.dataset.endswith("JTT")
 
