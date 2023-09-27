@@ -282,7 +282,7 @@ hparams_dict["SpawriousM2M_medium"] = hparams_dict["SpawriousM2M_hard"]
 
 count = 0
 for arch in ["resnet50"]: # or resnet50_nopretraining 
-    for algo in ["CutMix"]: # add CAD and DANN
+    for algo in ["DANN"]: # add CAD and DANN
         for dataset in [
             "SpawriousO2O_easy",
             "SpawriousO2O_medium",
@@ -291,32 +291,34 @@ for arch in ["resnet50"]: # or resnet50_nopretraining
             "SpawriousM2M_medium",
             "SpawriousM2M_hard",
         ]:
-                mix_strategy_list = ["LISA", "random_shuffle"]
+                # mix_strategy_list = ["LISA", "random_shuffle"]
 
-                if args.mix_strategy == "LISA":
-                        mix_strategy_list = ["LISA"]
-                elif args.mix_strategy == "random_shuffle":
-                        mix_strategy_list = ["random_shuffle"]  
-                elif args.mix_strategy is None:
-                        pass
-                else:
-                        raise ValueError("Invalid mix_strategy")
+                # if args.mix_strategy == "LISA":
+                #         mix_strategy_list = ["LISA"]
+                # elif args.mix_strategy == "random_shuffle":
+                #         mix_strategy_list = ["random_shuffle"]  
+                # elif args.mix_strategy is None:
+                #         pass
+                # else:
+                #         raise ValueError("Invalid mix_strategy")
 
-                for mix_strategy in mix_strategy_list:
-                        for mix_interpolation in ["CutMix", "Mixup"]:
+                # for mix_strategy in mix_strategy_list:
+                #         for mix_interpolation in ["CutMix", "Mixup"]:
 
-                                count += 1
-                                print(f"\n\n\nCount: {count}\n\n\n")
+                count += 1
+                print(f"\n\n\nCount: {count}\n\n\n")
 
-                                jtt_path = "./erm_output/resnet50_" + dataset + "_ERM_model.pkl"
-                                dataset_jtt = dataset + "_JTT"
-                                hparams = (
-                                hparams_dict[dataset]['ERM']
-                                .replace("batchsize", str(batch_size))
-                                .replace("archused", arch)
-                                )
-                                hparams = hparams.replace("\n", "").replace(" ", "")
-                                print(f"Train {algo} on {dataset}")
-                                os.system(
-                                f"""python3 -m domainbed.scripts.train_n --data_dir={data_dir}  --algorithm {algo} --mix_strategy {mix_strategy} --mix_interpolation {mix_interpolation} --test_env 0 --dataset {dataset} --pretrained_model_path {jtt_path} --hparams='{hparams}' --seed {args.seed} --output_dir {mix_strategy}-{mix_interpolation} --n_iter 2"""
-                                )
+                jtt_path = "./erm_output/resnet50_" + dataset + "_ERM_model.pkl"
+                dataset_jtt = dataset + "_JTT"
+                hparams = (
+                hparams_dict[dataset]['ERM']
+                .replace("batchsize", str(batch_size))
+                .replace("archused", arch)
+                )
+                hparams = hparams.replace("\n", "").replace(" ", "")
+                print(f"Train {algo} on {dataset}")
+                os.system(
+                f"""python3 -m domainbed.scripts.train_n --data_dir={data_dir}  --algorithm {algo} --test_env 0 --dataset {dataset} --hparams='{hparams}' --seed {args.seed} --output_dir {algo}-results --n_iter 2"""
+                )
+                # --mix_strategy {mix_strategy} --mix_interpolation {mix_interpolation}  --pretrained_model_path {jtt_path}
+

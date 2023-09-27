@@ -11,8 +11,8 @@ import uuid
 import json
 import os
 
-from wilds.datasets.camelyon17_dataset import Camelyon17Dataset
-from wilds.datasets.fmow_dataset import FMoWDataset
+# from wilds.datasets.camelyon17_dataset import Camelyon17Dataset
+# from wilds.datasets.fmow_dataset import FMoWDataset
 
 
 # utils #######################################################################
@@ -259,16 +259,17 @@ def download_sviro(data_dir):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Download datasets')
-    parser.add_argument('--data_dir', type=str, required=True)
-    args = parser.parse_args()
+    # parser = argparse.ArgumentParser(description='Download datasets')
+    # parser.add_argument('--data_dir', type=str, required=True)
+    # args = parser.parse_args()
 
     # download_mnist(args.data_dir)
     # download_pacs(args.data_dir)
     # download_office_home(args.data_dir)
     # download_domain_net(args.data_dir)
     # download_vlcs(args.data_dir)
-    download_terra_incognita(args.data_dir)
+    # download_terra_incognita(args.data_dir)
     # download_sviro(args.data_dir)
     # Camelyon17Dataset(root_dir=args.data_dir, download=True)
     # FMoWDataset(root_dir=args.data_dir, download=True)
+    download_and_extract("https://www.dropbox.com/s/e40j553480h3f3s/spawrious224.tar.gz?dl=1", "data/spawrious.tar.gz")
