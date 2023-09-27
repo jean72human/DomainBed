@@ -441,6 +441,8 @@ class SpawriousBenchmark(MultipleDomainDataset):
         self.type1 = type1
         train_datasets, test_datasets = self._prepare_data_lists(train_combinations, test_combinations, root_dir, augment)
         self.datasets = [ConcatDataset(test_datasets)] + train_datasets
+        # TODO: fix below to only be called for the appropriate times
+        # TODO: put DA dataset into the default entire dataset
         self.domain_adaptation_ds = ConcatDataset(self._prepare_data_lists_for_domain_adaptation(test_combinations, root_dir, augment))
 
     # Prepares the train and test data lists by applying the necessary transformations.
