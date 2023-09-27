@@ -281,8 +281,8 @@ hparams_dict["SpawriousM2M_easy"] = hparams_dict["SpawriousM2M_hard"]
 hparams_dict["SpawriousM2M_medium"] = hparams_dict["SpawriousM2M_hard"]
 
 count = 0
-for arch in ["resnet50"]: # or resnet50_nopretraining 
-    for algo in ["CAD"]: # add CAD and DANN
+for arch in ["resnet50_nopretraining"]: # or resnet50_nopretraining 
+    for algo in ["GroupDRO"]: # add CAD and DANN
         for dataset in [
             "SpawriousO2O_easy",
             "SpawriousO2O_medium",
