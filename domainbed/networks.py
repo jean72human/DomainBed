@@ -76,6 +76,9 @@ class ResNet(torch.nn.Module):
             if hparams['arch']=="resnet50":
                 self.network = self.network = torchvision.models.resnet50(weights=torchvision.models.ResNet50_Weights.DEFAULT)
                 self.n_outputs = 2048
+            elif hparams['arch'] == "resnet50_nopretraining":
+                self.network = self.network = torchvision.models.resnet50(weights=None)
+                self.n_outputs = 2048
             elif hparams['arch']=="resnet18":
                 self.network = torchvision.models.resnet18(weights=torchvision.models.ResNet18_Weights.DEFAULT)
                 self.n_outputs = 512
