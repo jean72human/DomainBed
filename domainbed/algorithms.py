@@ -655,7 +655,7 @@ class CutMix(ERM):
 
         loss = 0
 
-        if mix_strategy == "LISA": 
+        if mix_strategy.lower() == "LISA".lower(): 
             # Either mix two different environments with the same label, or mix two different labels from the same environment
 
             # TODO: make hparam
@@ -704,7 +704,7 @@ class CutMix(ERM):
             B2_x = all_x[B2_indices]
             B2_y = all_y[B2_indices]
 
-        elif mix_strategy == "random_shuffle":
+        elif mix_strategy.lower() == "random_shuffle".lower():
             # Get the whole batch, shuffle it randomly, and then split it in half to get B1 and B2
 
             indices = list(range(len(all_x)))
@@ -727,7 +727,7 @@ class CutMix(ERM):
         # lam = np.random.beta(self.hparams["cutmix_beta"], self.hparams["cutmix_beta"])
         lam = np.random.beta(1, 1)
 
-        if mix_interpolation == "CutMix":
+        if mix_interpolation.lower() == "CutMix".lower():
             r = np.random.randn(1)
             # TODO: make hparam
             # if r < self.hparams["cutmix_prob"]:
@@ -755,7 +755,7 @@ class CutMix(ERM):
                 output = self.network(all_x)
                 env_loss = F.cross_entropy(output, all_y)
 
-        elif mix_interpolation == "Mixup":
+        elif mix_interpolation.lower() == "Mixup".lower():
 
             x = lam * B1_x + (1 - lam) * B2_x
             target_a = B1_y

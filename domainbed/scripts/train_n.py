@@ -50,7 +50,7 @@ if __name__ == "__main__":
     # TODO: remove this after testing is done
     parser.add_argument('--retrain_steps', type=int, default=100,
         help='Number of layer retraining steps if using FLR or LLR.')
-    parser.add_argument('--checkpoint_freq', type=int, default=20,
+    parser.add_argument('--checkpoint_freq', type=int, default=None,
         help='Checkpoint every N steps. Default is dataset-dependent.')
     parser.add_argument('--test_envs', type=int, nargs='+', default=[0])
     parser.add_argument('--output_dir', type=str, default="train_output")
@@ -146,8 +146,13 @@ if __name__ == "__main__":
     best_list = []
 
     for iteration in range(args.n_iter):
-        # If we ever want to implement checkpointing, just persist these values
+        # If we ever want to implement checkpointing, just persist these valutes
         # every once in a while, and then load them from disk here.
+
+        import wandb
+        run = wandb.init(project='spawrious_iclr', entity='aengusl_generic')
+        wandb.config.update(args)
+
         start_step = 0
         if not jtt_bool:
             algorithm_dict = None
@@ -314,6 +319,8 @@ if __name__ == "__main__":
                     'epoch': step / steps_per_epoch,
                 }
 
+                wandb.log({"step": step, "epoch": step / steps_per_epoch})
+
                 for key, val in checkpoint_vals.items():
                     results[key] = np.mean(val)
 
@@ -324,6 +331,7 @@ if __name__ == "__main__":
                     else:
                         acc = misc.accuracy(algorithm, loader, weights, device, triplet=True)
                     results[name+'_acc'] = acc
+                    wandb.log({name+'_acc': acc})
 
                 results['mem_gb'] = torch.cuda.max_memory_allocated() / (1024.*1024.*1024.)
 
@@ -356,6 +364,8 @@ if __name__ == "__main__":
                 if args.save_model_every_checkpoint:
                     save_checkpoint(f'model_step{step}.pkl')
 
+        
+
         print("BEST")
         misc.print_row(last_results_keys, colwidth=12)
         misc.print_row([best_results[key] for key in last_results_keys],
@@ -363,6 +373,8 @@ if __name__ == "__main__":
         best_list.append(best_results)
 
         save_checkpoint(f'{hparams["arch"]}_{args.dataset}_{args.algorithm}_model.pkl')
+
+        run.finish()
 
     print()
     average_results = {
