@@ -293,14 +293,14 @@ for arch in ["resnet50"]: # or resnet50_nopretraining
         ]:
                 mix_strategy_list = ["LISA", "random_shuffle"]
 
-                if args.mix_strategy == "LISA":
-                        mix_strategy_list = ["LISA"]
-                elif args.mix_strategy == "random_shuffle":
-                        mix_strategy_list = ["random_shuffle"]  
-                elif args.mix_strategy is None:
-                        pass
-                else:
-                        raise ValueError("Invalid mix_strategy")
+                # if args.mix_strategy == "LISA":
+                #         mix_strategy_list = ["LISA"]
+                # elif args.mix_strategy == "random_shuffle":
+                #         mix_strategy_list = ["random_shuffle"]  
+                # elif args.mix_strategy is None:
+                #         pass
+                # else:
+                #         raise ValueError("Invalid mix_strategy")
 
                 for mix_strategy in mix_strategy_list:
                         for mix_interpolation in ["CutMix", "Mixup"]:
