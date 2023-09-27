@@ -7,5 +7,10 @@ search_output/*
 loop_output/*
 final_output/*
 *_output/
-
 data
+wandb
+*model.pkl
+*temp
+delete_me.py
+*output/
+*output2/
