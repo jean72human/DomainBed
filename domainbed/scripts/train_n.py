@@ -150,8 +150,16 @@ if __name__ == "__main__":
         # every once in a while, and then load them from disk here.
 
         import wandb
-        run = wandb.init(project='spawrious_iclr', entity='aengusl_generic')
+        run = wandb.init(
+            project='aengus-spawrious-comprehensive-runs', 
+            entity='remix_school-of-rock',
+            name=f"alg-{args.algorithm}_it-{iteration}_arch-{hparams['arch']}_ds-{args.dataset}",
+            )
         wandb.config.update(args)
+        wandb.config.update({"!architecture": hparams['arch']})
+        wandb.config.update({"!dataset": args.dataset})
+        wandb.config.update({"!algorithm": args.algorithm})
+        wandb.config.update({"!iteration": iteration})
 
         start_step = 0
         if not jtt_bool:

@@ -6,11 +6,29 @@ import warnings
 
 warnings.filterwarnings("ignore")
 
+def str2bool(v):
+    if isinstance(v, bool):
+       return v
+    if v.lower() in ('yes', 'true', 't', 'y', '1'):
+        return True
+    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
+        return False
+    else:
+        raise argparse.ArgumentTypeError('Boolean value expected.')
+
 parser = argparse.ArgumentParser(description="Domain generalization")
 
 parser.add_argument("--device", type=str, default="cuda:0")
 parser.add_argument("--seed", type=int, default=1)
 parser.add_argument("--mix_strategy", type=str, default=None)
+
+parser.add_argument("--dataset_group", type=str, default='A')
+parser.add_argument("--algorithm", type=str, default='ERM')
+parser.add_argument("--architecture", type=str, default='resnet50')
+parser.add_argument("--da_bool", type=str2bool, default=False, help='true for data augmentation')
+parser.add_argument("--da_strategy", type=str, default='no-no', help="""
+                    format for this argument is: random_shuffle-Mixup, random_shuffle-CutMix, LISA-Mixup, LISA-CutMix
+                    """)
 
 args = parser.parse_args()
 
@@ -280,45 +298,45 @@ hparams_dict["SpawriousO2O_hard"] = hparams_dict["SpawriousO2O_easy"]
 hparams_dict["SpawriousM2M_easy"] = hparams_dict["SpawriousM2M_hard"]
 hparams_dict["SpawriousM2M_medium"] = hparams_dict["SpawriousM2M_hard"]
 
+dataset_group = args.dataset_group
+algo = args.algorithm
+arch = args.architecture
+da_strategy = args.da_strategy
+da_bool = args.da_bool
+
+mix_strategy = da_strategy.split('-')[0]
+mix_interpolation = da_strategy.split('-')[1]
+
+dataset_group_dict = {
+        "A": ["SpawriousO2O_easy", "SpawriousO2O_medium"],
+        "B": ["SpawriousO2O_hard", "SpawriousM2M_easy"],
+        "C": ["SpawriousM2M_medium", "SpawriousM2M_hard"],
+}
+
 count = 0
-for arch in ["resnet50"]: # or resnet50_nopretraining 
-    for algo in ["DANN"]: # add CAD and DANN
-        for dataset in [
-            "SpawriousO2O_easy",
-            "SpawriousO2O_medium",
-            "SpawriousO2O_hard",
-            "SpawriousM2M_easy",
-            "SpawriousM2M_medium",
-            "SpawriousM2M_hard",
-        ]:
-                # mix_strategy_list = ["LISA", "random_shuffle"]
 
-                # if args.mix_strategy == "LISA":
-                #         mix_strategy_list = ["LISA"]
-                # elif args.mix_strategy == "random_shuffle":
-                #         mix_strategy_list = ["random_shuffle"]  
-                # elif args.mix_strategy is None:
-                #         pass
-                # else:
-                #         raise ValueError("Invalid mix_strategy")
+for dataset in dataset_group_dict[dataset_group]:
 
-                # for mix_strategy in mix_strategy_list:
-                #         for mix_interpolation in ["CutMix", "Mixup"]:
+        count += 1
+        print(f"\n\n\nCount: {count}\n\n\n")
 
-                count += 1
-                print(f"\n\n\nCount: {count}\n\n\n")
+        hparams = (
+        hparams_dict[dataset]['ERM']
+        .replace("batchsize", str(batch_size))
+        .replace("archused", arch)
+        )
+        hparams = hparams.replace("\n", "").replace(" ", "")
 
-                jtt_path = "./erm_output/resnet50_" + dataset + "_ERM_model.pkl"
-                dataset_jtt = dataset + "_JTT"
-                hparams = (
-                hparams_dict[dataset]['ERM']
-                .replace("batchsize", str(batch_size))
-                .replace("archused", arch)
-                )
-                hparams = hparams.replace("\n", "").replace(" ", "")
-                print(f"Train {algo} on {dataset}")
+        print(f"Train {algo} on {dataset}")
+
+        if da_bool:
+
                 os.system(
-                f"""python3 -m domainbed.scripts.train_n --data_dir={data_dir}  --algorithm {algo} --test_env 0 --dataset {dataset} --hparams='{hparams}' --seed {args.seed} --output_dir {algo}-results --n_iter 2"""
+                f"""python3 -m domainbed.scripts.train_n --data_dir={data_dir}  --algorithm {algo} --test_env 0 --dataset {dataset} --hparams='{hparams}' --seed {args.seed} --output_dir {algo}-{arch}-{da_strategy}-results --n_iter 5 --mix_strategy {mix_strategy} --mix_interpolation {mix_interpolation}"""
                 )
-                # --mix_strategy {mix_strategy} --mix_interpolation {mix_interpolation}  --pretrained_model_path {jtt_path}
-
+                
+        else:
+                
+                os.system(
+                f"""python3 -m domainbed.scripts.train_n --data_dir={data_dir}  --algorithm {algo} --test_env 0 --dataset {dataset} --hparams='{hparams}' --seed {args.seed} --output_dir {algo}-{arch}-{da_strategy}-results --n_iter 3"""
+                )
