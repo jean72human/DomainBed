@@ -2,7 +2,7 @@
 #$ -l h_rt=42:00:00
 #$ -l gpu=1
 #$ -pe smp 16
-#$ -N resnet50
+#$ -N resnet50-nopretraining da false
 #$ -R y
 #$ -ac allow=E,F
 #$ -S /bin/bash
@@ -19,7 +19,7 @@ nvidia-smi
 ## resnet18
 
 # Group A, ERM algorithm
-python -m domainbed.scripts.loop_arch_resnet.py --dataset_group A --algorithm ERM --architecture resnet18 --da_bool False
+# python -m domainbed.scripts.loop_arch_resnet.py --dataset_group A --algorithm ERM --architecture resnet18 --da_bool False
 # python -m domainbed.scripts.loop_arch_resnet.py --dataset_group A --algorithm ERM --architecture resnet18 --da_bool True --da_strategy random_shuffle-Mixup
 # python -m domainbed.scripts.loop_arch_resnet.py --dataset_group A --algorithm ERM --architecture resnet18 --da_bool True --da_strategy random_shuffle-CutMix
 # python -m domainbed.scripts.loop_arch_resnet.py --dataset_group A --algorithm ERM --architecture resnet18 --da_bool True --da_strategy LISA-Mixup
@@ -61,7 +61,7 @@ python -m domainbed.scripts.loop_arch_resnet.py --dataset_group A --algorithm ER
 # ## resnet50-nopretraining
 
 # # Group A, ERM algorithm
-# python -m domainbed.scripts.loop_arch_resnet.py --dataset_group A --algorithm ERM --architecture resnet50-nopretraining --da_bool False
+python -m domainbed.scripts.loop_arch_resnet.py --dataset_group A --algorithm ERM --architecture resnet50-nopretraining --da_bool False
 # python -m domainbed.scripts.loop_arch_resnet.py --dataset_group A --algorithm ERM --architecture resnet50-nopretraining --da_bool True --da_strategy random_shuffle-Mixup
 # python -m domainbed.scripts.loop_arch_resnet.py --dataset_group A --algorithm ERM --architecture resnet50-nopretraining --da_bool True --da_strategy random_shuffle-CutMix
 # python -m domainbed.scripts.loop_arch_resnet.py --dataset_group A --algorithm ERM --architecture resnet50-nopretraining --da_bool True --da_strategy LISA-Mixup
