@@ -24,7 +24,7 @@ parser.add_argument("--mix_strategy", type=str, default=None)
 
 parser.add_argument("--dataset_group", type=str, default='A')
 parser.add_argument("--algorithm", type=str, default='ERM')
-parser.add_argument("--architecture", type=str, default='resnet50')
+parser.add_argument("--architecture", type=str, default='resnet50', help='alternative is resnet50_nopretraining')
 parser.add_argument("--da_bool", type=str2bool, default=False, help='true for data augmentation')
 parser.add_argument("--da_strategy", type=str, default='no-no', help="""
                     format for this argument is: random_shuffle-Mixup, random_shuffle-CutMix, LISA-Mixup, LISA-CutMix
