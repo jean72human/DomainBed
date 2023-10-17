@@ -4,10 +4,75 @@
 
 # List of Python commands
 declare -a PYTHON_COMMANDS=(
+    # no pretraining
     "python -m domainbed.scripts.loop_arch_resnet --dataset_group A --algorithm ERM --architecture resnet50-nopretraining --da_bool False"
     "python -m domainbed.scripts.loop_arch_resnet --dataset_group A --algorithm ERM --architecture resnet50-nopretraining --da_bool True --da_strategy random_shuffle-Mixup"
-    # Add more commands here
+    "python -m domainbed.scripts.loop_arch_resnet --dataset_group A --algorithm ERM --architecture resnet50-nopretraining --da_bool True --da_strategy random_shuffle-CutMix"
+    "python -m domainbed.scripts.loop_arch_resnet --dataset_group A --algorithm ERM --architecture resnet50-nopretraining --da_bool True --da_strategy LISA-Mixup"
+    "python -m domainbed.scripts.loop_arch_resnet --dataset_group A --algorithm ERM --architecture resnet50-nopretraining --da_bool True --da_strategy LISA-CutMix"
+    "python -m domainbed.scripts.loop_arch_resnet --dataset_group B --algorithm ERM --architecture resnet50-nopretraining --da_bool False"
+    "python -m domainbed.scripts.loop_arch_resnet --dataset_group B --algorithm ERM --architecture resnet50-nopretraining --da_bool True --da_strategy random_shuffle-Mixup"
+    "python -m domainbed.scripts.loop_arch_resnet --dataset_group B --algorithm ERM --architecture resnet50-nopretraining --da_bool True --da_strategy random_shuffle-CutMix"
+    "python -m domainbed.scripts.loop_arch_resnet --dataset_group B --algorithm ERM --architecture resnet50-nopretraining --da_bool True --da_strategy LISA-Mixup"
+    "python -m domainbed.scripts.loop_arch_resnet --dataset_group B --algorithm ERM --architecture resnet50-nopretraining --da_bool True --da_strategy LISA-CutMix"
+    "python -m domainbed.scripts.loop_arch_resnet --dataset_group C --algorithm ERM --architecture resnet50-nopretraining --da_bool False"
+    "python -m domainbed.scripts.loop_arch_resnet --dataset_group C --algorithm ERM --architecture resnet50-nopretraining --da_bool True --da_strategy random_shuffle-Mixup"
+    "python -m domainbed.scripts.loop_arch_resnet --dataset_group C --algorithm ERM --architecture resnet50-nopretraining --da_bool True --da_strategy random_shuffle-CutMix"
+    "python -m domainbed.scripts.loop_arch_resnet --dataset_group C --algorithm ERM --architecture resnet50-nopretraining --da_bool True --da_strategy LISA-Mixup"
+    "python -m domainbed.scripts.loop_arch_resnet --dataset_group C --algorithm ERM --architecture resnet50-nopretraining --da_bool True --da_strategy LISA-CutMix"
+    # GroupDRO algorithm with resnet50-nopretraining
+    "python -m domainbed.scripts.loop_arch_resnet --dataset_group A --algorithm GroupDRO --architecture resnet50-nopretraining --da_bool False"
+    "python -m domainbed.scripts.loop_arch_resnet --dataset_group B --algorithm GroupDRO --architecture resnet50-nopretraining --da_bool False"
+    "python -m domainbed.scripts.loop_arch_resnet --dataset_group C --algorithm GroupDRO --architecture resnet50-nopretraining --da_bool False"
+    # MMD-AE algorithm with resnet50-nopretraining
+    "python -m domainbed.scripts.loop_arch_resnet --dataset_group A --algorithm MMD-AE --architecture resnet50-nopretraining --da_bool False"
+    "python -m domainbed.scripts.loop_arch_resnet --dataset_group B --algorithm MMD-AE --architecture resnet50-nopretraining --da_bool False"
+    "python -m domainbed.scripts.loop_arch_resnet --dataset_group C --algorithm MMD-AE --architecture resnet50-nopretraining --da_bool False"
+   
+    # vit
+
+    "python -m domainbed.scripts.loop_arch_resnet --dataset_group A --algorithm ERM --architecture vit-b --da_bool False"
+    "python -m domainbed.scripts.loop_arch_resnet --dataset_group A --algorithm ERM --architecture vit-b --da_bool True --da_strategy random_shuffle-Mixup"
+    "python -m domainbed.scripts.loop_arch_resnet --dataset_group A --algorithm ERM --architecture vit-b --da_bool True --da_strategy random_shuffle-CutMix"
+    "python -m domainbed.scripts.loop_arch_resnet --dataset_group A --algorithm ERM --architecture vit-b --da_bool True --da_strategy LISA-Mixup"
+    "python -m domainbed.scripts.loop_arch_resnet --dataset_group A --algorithm ERM --architecture vit-b --da_bool True --da_strategy LISA-CutMix"
+    "python -m domainbed.scripts.loop_arch_resnet --dataset_group B --algorithm ERM --architecture vit-b --da_bool False"
+    "python -m domainbed.scripts.loop_arch_resnet --dataset_group B --algorithm ERM --architecture vit-b --da_bool True --da_strategy random_shuffle-Mixup"
+    "python -m domainbed.scripts.loop_arch_resnet --dataset_group B --algorithm ERM --architecture vit-b --da_bool True --da_strategy random_shuffle-CutMix"
+    "python -m domainbed.scripts.loop_arch_resnet --dataset_group B --algorithm ERM --architecture vit-b --da_bool True --da_strategy LISA-Mixup"
+    "python -m domainbed.scripts.loop_arch_resnet --dataset_group B --algorithm ERM --architecture vit-b --da_bool True --da_strategy LISA-CutMix"
+    "python -m domainbed.scripts.loop_arch_resnet --dataset_group C --algorithm ERM --architecture vit-b --da_bool False"
+    "python -m domainbed.scripts.loop_arch_resnet --dataset_group C --algorithm ERM --architecture vit-b --da_bool True --da_strategy random_shuffle-Mixup"
+    "python -m domainbed.scripts.loop_arch_resnet --dataset_group C --algorithm ERM --architecture vit-b --da_bool True --da_strategy random_shuffle-CutMix"
+    "python -m domainbed.scripts.loop_arch_resnet --dataset_group C --algorithm ERM --architecture vit-b --da_bool True --da_strategy LISA-Mixup"
+    "python -m domainbed.scripts.loop_arch_resnet --dataset_group C --algorithm ERM --architecture vit-b --da_bool True --da_strategy LISA-CutMix"
+    
+    ## GroupDRO algorithm
+    "python -m domainbed.scripts.loop_arch_resnet --dataset_group A --algorithm GroupDRO --architecture vit-b --da_bool False"
+    "python -m domainbed.scripts.loop_arch_resnet --dataset_group B --algorithm GroupDRO --architecture vit-b --da_bool False"
+    "python -m domainbed.scripts.loop_arch_resnet --dataset_group C --algorithm GroupDRO --architecture vit-b --da_bool False"
+
+    ## MMD-AE algorithm
+    "python -m domainbed.scripts.loop_arch_resnet --dataset_group A --algorithm MMD-AE --architecture vit-b --da_bool False"
+    "python -m domainbed.scripts.loop_arch_resnet --dataset_group B --algorithm MMD-AE --architecture vit-b --da_bool False"
+    "python -m domainbed.scripts.loop_arch_resnet --dataset_group C --algorithm MMD-AE --architecture vit-b --da_bool False"
+
+    # resnet50
+
+    "python -m domainbed.scripts.loop_arch_resnet --dataset_group A --algorithm ERM --architecture resnet50 --da_bool True --da_strategy random_shuffle-Mixup"
+    "python -m domainbed.scripts.loop_arch_resnet --dataset_group A --algorithm ERM --architecture resnet50 --da_bool True --da_strategy random_shuffle-CutMix"
+    "python -m domainbed.scripts.loop_arch_resnet --dataset_group A --algorithm ERM --architecture resnet50 --da_bool True --da_strategy LISA-Mixup"
+    "python -m domainbed.scripts.loop_arch_resnet --dataset_group A --algorithm ERM --architecture resnet50 --da_bool True --da_strategy LISA-CutMix"
+    "python -m domainbed.scripts.loop_arch_resnet --dataset_group B --algorithm ERM --architecture resnet50 --da_bool True --da_strategy random_shuffle-Mixup"
+    "python -m domainbed.scripts.loop_arch_resnet --dataset_group B --algorithm ERM --architecture resnet50 --da_bool True --da_strategy random_shuffle-CutMix"
+    "python -m domainbed.scripts.loop_arch_resnet --dataset_group B --algorithm ERM --architecture resnet50 --da_bool True --da_strategy LISA-Mixup"
+    "python -m domainbed.scripts.loop_arch_resnet --dataset_group B --algorithm ERM --architecture resnet50 --da_bool True --da_strategy LISA-CutMix"
+    "python -m domainbed.scripts.loop_arch_resnet --dataset_group C --algorithm ERM --architecture resnet50 --da_bool True --da_strategy random_shuffle-Mixup"
+    "python -m domainbed.scripts.loop_arch_resnet --dataset_group C --algorithm ERM --architecture resnet50 --da_bool True --da_strategy random_shuffle-CutMix"
+    "python -m domainbed.scripts.loop_arch_resnet --dataset_group C --algorithm ERM --architecture resnet50 --da_bool True --da_strategy LISA-Mixup"
+    "python -m domainbed.scripts.loop_arch_resnet --dataset_group C --algorithm ERM --architecture resnet50 --da_bool True --da_strategy LISA-CutMix"
 )
+
 
 # Iterate through the list of Python commands
 for CMD in "${PYTHON_COMMANDS[@]}"; do
