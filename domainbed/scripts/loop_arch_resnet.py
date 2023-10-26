@@ -332,7 +332,7 @@ for dataset in dataset_group_dict[dataset_group]:
         if da_bool:
 
                 os.system(
-                f"""python3 -m domainbed.scripts.train_n --data_dir={data_dir}  --algorithm {algo} --test_env 0 --dataset {dataset} --hparams='{hparams}' --seed {args.seed} --output_dir {algo}-{arch}-{da_strategy}-results --n_iter 5 --mix_strategy {mix_strategy} --mix_interpolation {mix_interpolation}"""
+                f"""python3 -m domainbed.scripts.train_n --data_dir={data_dir}  --algorithm {algo} --test_env 0 --dataset {dataset} --hparams='{hparams}' --seed {args.seed} --output_dir {algo}-{arch}-{da_strategy}-results --n_iter 3 --mix_strategy {mix_strategy} --mix_interpolation {mix_interpolation}"""
                 )
                 
         else:
