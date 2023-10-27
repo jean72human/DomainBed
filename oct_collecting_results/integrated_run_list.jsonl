@@ -2,8 +2,8 @@
 {"configs": {"ds": "SpawriousO2O_easy", "alg": "ERM", "arch": "vit-b"}, "test_acc": [], "n_iterations": 0, "iterations_left": 3}
 {"configs": {"ds": "SpawriousO2O_easy", "alg": "GroupDRO", "arch": "resnet50-nopretraining"}, "test_acc": [0.4433813375419215, 0.4714440718090353, 0.48027224304596566], "n_iterations": 3, "iterations_left": 0}
 {"configs": {"ds": "SpawriousO2O_easy", "alg": "GroupDRO", "arch": "vit-b"}, "test_acc": [], "n_iterations": 0, "iterations_left": 3}
-{"configs": {"ds": "SpawriousO2O_easy", "alg": "MMD-AE", "arch": "resnet50-nopretraining"}, "test_acc": [], "n_iterations": 0, "iterations_left": 3}
-{"configs": {"ds": "SpawriousO2O_easy", "alg": "MMD-AE", "arch": "vit-b"}, "test_acc": [], "n_iterations": 0, "iterations_left": 3}
+{"configs": {"ds": "SpawriousO2O_easy", "alg": "MMD", "arch": "resnet50-nopretraining"}, "test_acc": [], "n_iterations": 0, "iterations_left": 3}
+{"configs": {"ds": "SpawriousO2O_easy", "alg": "MMD", "arch": "vit-b"}, "test_acc": [], "n_iterations": 0, "iterations_left": 3}
 {"configs": {"ds": "SpawriousO2O_easy", "alg": "LISA-Mixup", "arch": "resnet50-nopretraining"}, "test_acc": [0.4325803906095877, 0.40599723811402644, 0.4577826001183665, 0.4305582955217992, 0.48421779443677254], "n_iterations": 5, "iterations_left": 0}
 {"configs": {"ds": "SpawriousO2O_easy", "alg": "LISA-Mixup", "arch": "vit-b"}, "test_acc": [], "n_iterations": 0, "iterations_left": 3}
 {"configs": {"ds": "SpawriousO2O_easy", "alg": "LISA-CutMix", "arch": "resnet50-nopretraining"}, "test_acc": [0.4325803906095877, 0.40599723811402644, 0.4577826001183665, 0.4305582955217992, 0.48421779443677254], "n_iterations": 5, "iterations_left": 0}
@@ -16,8 +16,8 @@
 {"configs": {"ds": "SpawriousO2O_medium", "alg": "ERM", "arch": "vit-b"}, "test_acc": [], "n_iterations": 0, "iterations_left": 3}
 {"configs": {"ds": "SpawriousO2O_medium", "alg": "GroupDRO", "arch": "resnet50-nopretraining"}, "test_acc": [0.44550207141448017, 0.4855987374235549, 0.4645393568751233], "n_iterations": 3, "iterations_left": 0}
 {"configs": {"ds": "SpawriousO2O_medium", "alg": "GroupDRO", "arch": "vit-b"}, "test_acc": [], "n_iterations": 0, "iterations_left": 3}
-{"configs": {"ds": "SpawriousO2O_medium", "alg": "MMD-AE", "arch": "resnet50-nopretraining"}, "test_acc": [], "n_iterations": 0, "iterations_left": 3}
-{"configs": {"ds": "SpawriousO2O_medium", "alg": "MMD-AE", "arch": "vit-b"}, "test_acc": [], "n_iterations": 0, "iterations_left": 3}
+{"configs": {"ds": "SpawriousO2O_medium", "alg": "MMD", "arch": "resnet50-nopretraining"}, "test_acc": [], "n_iterations": 0, "iterations_left": 3}
+{"configs": {"ds": "SpawriousO2O_medium", "alg": "MMD", "arch": "vit-b"}, "test_acc": [], "n_iterations": 0, "iterations_left": 3}
 {"configs": {"ds": "SpawriousO2O_medium", "alg": "LISA-Mixup", "arch": "resnet50-nopretraining"}, "test_acc": [0.44165515880844347], "n_iterations": 1, "iterations_left": 2}
 {"configs": {"ds": "SpawriousO2O_medium", "alg": "LISA-Mixup", "arch": "vit-b"}, "test_acc": [], "n_iterations": 0, "iterations_left": 3}
 {"configs": {"ds": "SpawriousO2O_medium", "alg": "LISA-CutMix", "arch": "resnet50-nopretraining"}, "test_acc": [0.44165515880844347], "n_iterations": 1, "iterations_left": 2}
@@ -30,8 +30,8 @@
 {"configs": {"ds": "SpawriousO2O_hard", "alg": "ERM", "arch": "vit-b"}, "test_acc": [], "n_iterations": 0, "iterations_left": 3}
 {"configs": {"ds": "SpawriousO2O_hard", "alg": "GroupDRO", "arch": "resnet50-nopretraining"}, "test_acc": [0.4386959952653383, 0.3795620437956204, 0.3758137699743539], "n_iterations": 3, "iterations_left": 0}
 {"configs": {"ds": "SpawriousO2O_hard", "alg": "GroupDRO", "arch": "vit-b"}, "test_acc": [], "n_iterations": 0, "iterations_left": 3}
-{"configs": {"ds": "SpawriousO2O_hard", "alg": "MMD-AE", "arch": "resnet50-nopretraining"}, "test_acc": [], "n_iterations": 0, "iterations_left": 3}
-{"configs": {"ds": "SpawriousO2O_hard", "alg": "MMD-AE", "arch": "vit-b"}, "test_acc": [], "n_iterations": 0, "iterations_left": 3}
+{"configs": {"ds": "SpawriousO2O_hard", "alg": "MMD", "arch": "resnet50-nopretraining"}, "test_acc": [], "n_iterations": 0, "iterations_left": 3}
+{"configs": {"ds": "SpawriousO2O_hard", "alg": "MMD", "arch": "vit-b"}, "test_acc": [], "n_iterations": 0, "iterations_left": 3}
 {"configs": {"ds": "SpawriousO2O_hard", "alg": "LISA-Mixup", "arch": "resnet50-nopretraining"}, "test_acc": [0.42232195699348984, 0.3651607812191754, 0.4164036299072795, 0.4312487670151904, 0.4078713750246597], "n_iterations": 5, "iterations_left": 0}
 {"configs": {"ds": "SpawriousO2O_hard", "alg": "LISA-Mixup", "arch": "vit-b"}, "test_acc": [], "n_iterations": 0, "iterations_left": 3}
 {"configs": {"ds": "SpawriousO2O_hard", "alg": "LISA-CutMix", "arch": "resnet50-nopretraining"}, "test_acc": [0.42232195699348984, 0.3651607812191754, 0.4164036299072795, 0.4312487670151904, 0.4078713750246597], "n_iterations": 5, "iterations_left": 0}
@@ -44,8 +44,8 @@
 {"configs": {"ds": "SpawriousM2M_easy", "alg": "ERM", "arch": "vit-b"}, "test_acc": [], "n_iterations": 0, "iterations_left": 3}
 {"configs": {"ds": "SpawriousM2M_easy", "alg": "GroupDRO", "arch": "resnet50-nopretraining"}, "test_acc": [0.6049023476030775, 0.621868218583547, 0.597701716314855], "n_iterations": 3, "iterations_left": 0}
 {"configs": {"ds": "SpawriousM2M_easy", "alg": "GroupDRO", "arch": "vit-b"}, "test_acc": [], "n_iterations": 0, "iterations_left": 3}
-{"configs": {"ds": "SpawriousM2M_easy", "alg": "MMD-AE", "arch": "resnet50-nopretraining"}, "test_acc": [], "n_iterations": 0, "iterations_left": 3}
-{"configs": {"ds": "SpawriousM2M_easy", "alg": "MMD-AE", "arch": "vit-b"}, "test_acc": [], "n_iterations": 0, "iterations_left": 3}
+{"configs": {"ds": "SpawriousM2M_easy", "alg": "MMD", "arch": "resnet50-nopretraining"}, "test_acc": [], "n_iterations": 0, "iterations_left": 3}
+{"configs": {"ds": "SpawriousM2M_easy", "alg": "MMD", "arch": "vit-b"}, "test_acc": [], "n_iterations": 0, "iterations_left": 3}
 {"configs": {"ds": "SpawriousM2M_easy", "alg": "LISA-Mixup", "arch": "resnet50-nopretraining"}, "test_acc": [0.5159301637403827], "n_iterations": 1, "iterations_left": 2}
 {"configs": {"ds": "SpawriousM2M_easy", "alg": "LISA-Mixup", "arch": "vit-b"}, "test_acc": [], "n_iterations": 0, "iterations_left": 3}
 {"configs": {"ds": "SpawriousM2M_easy", "alg": "LISA-CutMix", "arch": "resnet50-nopretraining"}, "test_acc": [0.5159301637403827], "n_iterations": 1, "iterations_left": 2}
@@ -58,8 +58,8 @@
 {"configs": {"ds": "SpawriousM2M_medium", "alg": "ERM", "arch": "vit-b"}, "test_acc": [], "n_iterations": 0, "iterations_left": 3}
 {"configs": {"ds": "SpawriousM2M_medium", "alg": "GroupDRO", "arch": "resnet50-nopretraining"}, "test_acc": [0.3095285066087986, 0.31761688695995266, 0.3244229631090945], "n_iterations": 3, "iterations_left": 0}
 {"configs": {"ds": "SpawriousM2M_medium", "alg": "GroupDRO", "arch": "vit-b"}, "test_acc": [], "n_iterations": 0, "iterations_left": 3}
-{"configs": {"ds": "SpawriousM2M_medium", "alg": "MMD-AE", "arch": "resnet50-nopretraining"}, "test_acc": [], "n_iterations": 0, "iterations_left": 3}
-{"configs": {"ds": "SpawriousM2M_medium", "alg": "MMD-AE", "arch": "vit-b"}, "test_acc": [], "n_iterations": 0, "iterations_left": 3}
+{"configs": {"ds": "SpawriousM2M_medium", "alg": "MMD", "arch": "resnet50-nopretraining"}, "test_acc": [], "n_iterations": 0, "iterations_left": 3}
+{"configs": {"ds": "SpawriousM2M_medium", "alg": "MMD", "arch": "vit-b"}, "test_acc": [], "n_iterations": 0, "iterations_left": 3}
 {"configs": {"ds": "SpawriousM2M_medium", "alg": "LISA-Mixup", "arch": "resnet50-nopretraining"}, "test_acc": [0.3354211876109686, 0.32466956007101994, 0.29409153679226674, 0.30582955217991714, 0.30089761294140854], "n_iterations": 5, "iterations_left": 0}
 {"configs": {"ds": "SpawriousM2M_medium", "alg": "LISA-Mixup", "arch": "vit-b"}, "test_acc": [], "n_iterations": 0, "iterations_left": 3}
 {"configs": {"ds": "SpawriousM2M_medium", "alg": "LISA-CutMix", "arch": "resnet50-nopretraining"}, "test_acc": [0.3354211876109686, 0.32466956007101994, 0.29409153679226674, 0.30582955217991714, 0.30089761294140854], "n_iterations": 5, "iterations_left": 0}
@@ -72,8 +72,8 @@
 {"configs": {"ds": "SpawriousM2M_hard", "alg": "ERM", "arch": "vit-b"}, "test_acc": [], "n_iterations": 0, "iterations_left": 3}
 {"configs": {"ds": "SpawriousM2M_hard", "alg": "GroupDRO", "arch": "resnet50-nopretraining"}, "test_acc": [0.33670349181298087, 0.274117182876307, 0.3376405602682975], "n_iterations": 3, "iterations_left": 0}
 {"configs": {"ds": "SpawriousM2M_hard", "alg": "GroupDRO", "arch": "vit-b"}, "test_acc": [], "n_iterations": 0, "iterations_left": 3}
-{"configs": {"ds": "SpawriousM2M_hard", "alg": "MMD-AE", "arch": "resnet50-nopretraining"}, "test_acc": [], "n_iterations": 0, "iterations_left": 3}
-{"configs": {"ds": "SpawriousM2M_hard", "alg": "MMD-AE", "arch": "vit-b"}, "test_acc": [], "n_iterations": 0, "iterations_left": 3}
+{"configs": {"ds": "SpawriousM2M_hard", "alg": "MMD", "arch": "resnet50-nopretraining"}, "test_acc": [], "n_iterations": 0, "iterations_left": 3}
+{"configs": {"ds": "SpawriousM2M_hard", "alg": "MMD", "arch": "vit-b"}, "test_acc": [], "n_iterations": 0, "iterations_left": 3}
 {"configs": {"ds": "SpawriousM2M_hard", "alg": "LISA-Mixup", "arch": "resnet50-nopretraining"}, "test_acc": [0.30632274610376803], "n_iterations": 1, "iterations_left": 2}
 {"configs": {"ds": "SpawriousM2M_hard", "alg": "LISA-Mixup", "arch": "vit-b"}, "test_acc": [], "n_iterations": 0, "iterations_left": 3}
 {"configs": {"ds": "SpawriousM2M_hard", "alg": "LISA-CutMix", "arch": "resnet50-nopretraining"}, "test_acc": [0.30632274610376803], "n_iterations": 1, "iterations_left": 2}

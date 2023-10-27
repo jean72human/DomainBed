@@ -23,17 +23,20 @@ parser.add_argument("--seed", type=int, default=1)
 parser.add_argument("--mix_strategy", type=str, default=None)
 
 parser.add_argument("--dataset_group", type=str, default='A')
+parser.add_argument("--dataset", type=str, default=None)
 parser.add_argument("--algorithm", type=str, default='ERM')
-parser.add_argument("--architecture", type=str, default='resnet50', help='alternative is resnet50_nopretraining')
+parser.add_argument("--architecture", type=str, default='resnet50', help='alternatives: resnet50_nopretraining, vit-b')
 parser.add_argument("--da_bool", type=str2bool, default=False, help='true for data augmentation')
 parser.add_argument("--da_strategy", type=str, default='no-no', help="""
                     format for this argument is: random_shuffle-Mixup, random_shuffle-CutMix, LISA-Mixup, LISA-CutMix
                     """)
+parser.add_argument("--n_iter", type=int, default=3)
 
 args = parser.parse_args()
 
 data_dir = "./data/spawrious224"
 batch_size = 128
+# batch_size = 2
 
 hparams_dict = {
     "SpawriousO2O_easy": {
@@ -303,6 +306,7 @@ algo = args.algorithm
 arch = args.architecture
 da_strategy = args.da_strategy
 da_bool = args.da_bool
+dataset = args.dataset
 
 mix_strategy = da_strategy.split('-')[0]
 mix_interpolation = da_strategy.split('-')[1]
@@ -313,9 +317,27 @@ dataset_group_dict = {
         "C": ["SpawriousM2M_medium", "SpawriousM2M_hard"],
 }
 
+every_dataset_group_dict = {
+        "A": ["SpawriousO2O_easy"],
+        "B": ["SpawriousO2O_medium"],
+        "C": ["SpawriousO2O_hard"],
+        "D": ["SpawriousM2M_easy"],
+        "E": ["SpawriousM2M_medium"],
+        "F": ["SpawriousM2M_hard"],
+}
+
 count = 0
 
-for dataset in dataset_group_dict[dataset_group]:
+if dataset is None:
+        if arch == "vit-b":
+                dataset_list = every_dataset_group_dict[dataset_group]
+        else:
+                dataset_list = dataset_group_dict[dataset_group]
+else:
+        dataset_list = [dataset]
+
+# for dataset in dataset_group_dict[dataset_group]:
+for dataset in dataset_list:
 
         count += 1
         print(f"\n\n\nCount: {count}\n\n\n")
@@ -332,11 +354,11 @@ for dataset in dataset_group_dict[dataset_group]:
         if da_bool:
 
                 os.system(
-                f"""python3 -m domainbed.scripts.train_n --data_dir={data_dir}  --algorithm {algo} --test_env 0 --dataset {dataset} --hparams='{hparams}' --seed {args.seed} --output_dir {algo}-{arch}-{da_strategy}-results --n_iter 3 --mix_strategy {mix_strategy} --mix_interpolation {mix_interpolation}"""
+                f"""python3 -m domainbed.scripts.train_n --data_dir={data_dir}  --algorithm {algo} --test_env 0 --dataset {dataset} --hparams='{hparams}' --seed {args.seed} --output_dir {algo}-{arch}-{da_strategy}-results --n_iter {args.n_iter} --mix_strategy {mix_strategy} --mix_interpolation {mix_interpolation}"""
                 )
                 
         else:
                 
                 os.system(
-                f"""python3 -m domainbed.scripts.train_n --data_dir={data_dir}  --algorithm {algo} --test_env 0 --dataset {dataset} --hparams='{hparams}' --seed {args.seed} --output_dir {algo}-{arch}-{da_strategy}-results --n_iter 3"""
+                f"""python3 -m domainbed.scripts.train_n --data_dir={data_dir}  --algorithm {algo} --test_env 0 --dataset {dataset} --hparams='{hparams}' --seed {args.seed} --output_dir {algo}-{arch}-{da_strategy}-results --n_iter {args.n_iter} """
                 )

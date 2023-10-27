@@ -151,7 +151,7 @@ if __name__ == "__main__":
 
         import wandb
         run = wandb.init(
-            project='aengus-spawrious-comprehensive-runs', 
+            project='aengus-spawrious-comprehensive-runs-round2', 
             entity='remix_school-of-rock',
             name=f"alg-{args.algorithm}_it-{iteration}_arch-{hparams['arch']}_ds-{args.dataset}",
             )
@@ -160,6 +160,7 @@ if __name__ == "__main__":
         wandb.config.update({"!dataset": args.dataset})
         wandb.config.update({"!algorithm": args.algorithm})
         wandb.config.update({"!iteration": iteration})
+        wandb.config.update({"!output_dir": args.output_dir})
 
         start_step = 0
         if not jtt_bool:
