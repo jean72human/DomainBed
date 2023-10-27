@@ -1,77 +1,5 @@
 #!/bin/bash
-
 # Outer Bash script
-
-# # List of Python commands
-# declare -a PYTHON_COMMANDS=(
-#     # no pretraining
-#     "python -m domainbed.scripts.loop_arch_resnet --dataset_group A --algorithm ERM --architecture resnet50-nopretraining --da_bool False"
-#     "python -m domainbed.scripts.loop_arch_resnet --dataset_group A --algorithm ERM --architecture resnet50-nopretraining --da_bool True --da_strategy random_shuffle-Mixup"
-#     "python -m domainbed.scripts.loop_arch_resnet --dataset_group A --algorithm ERM --architecture resnet50-nopretraining --da_bool True --da_strategy random_shuffle-CutMix"
-#     "python -m domainbed.scripts.loop_arch_resnet --dataset_group A --algorithm ERM --architecture resnet50-nopretraining --da_bool True --da_strategy LISA-Mixup"
-#     "python -m domainbed.scripts.loop_arch_resnet --dataset_group A --algorithm ERM --architecture resnet50-nopretraining --da_bool True --da_strategy LISA-CutMix"
-#     "python -m domainbed.scripts.loop_arch_resnet --dataset_group B --algorithm ERM --architecture resnet50-nopretraining --da_bool False"
-#     "python -m domainbed.scripts.loop_arch_resnet --dataset_group B --algorithm ERM --architecture resnet50-nopretraining --da_bool True --da_strategy random_shuffle-Mixup"
-#     "python -m domainbed.scripts.loop_arch_resnet --dataset_group B --algorithm ERM --architecture resnet50-nopretraining --da_bool True --da_strategy random_shuffle-CutMix"
-#     "python -m domainbed.scripts.loop_arch_resnet --dataset_group B --algorithm ERM --architecture resnet50-nopretraining --da_bool True --da_strategy LISA-Mixup"
-#     "python -m domainbed.scripts.loop_arch_resnet --dataset_group B --algorithm ERM --architecture resnet50-nopretraining --da_bool True --da_strategy LISA-CutMix"
-#     "python -m domainbed.scripts.loop_arch_resnet --dataset_group C --algorithm ERM --architecture resnet50-nopretraining --da_bool False"
-#     "python -m domainbed.scripts.loop_arch_resnet --dataset_group C --algorithm ERM --architecture resnet50-nopretraining --da_bool True --da_strategy random_shuffle-Mixup"
-#     "python -m domainbed.scripts.loop_arch_resnet --dataset_group C --algorithm ERM --architecture resnet50-nopretraining --da_bool True --da_strategy random_shuffle-CutMix"
-#     "python -m domainbed.scripts.loop_arch_resnet --dataset_group C --algorithm ERM --architecture resnet50-nopretraining --da_bool True --da_strategy LISA-Mixup"
-#     "python -m domainbed.scripts.loop_arch_resnet --dataset_group C --algorithm ERM --architecture resnet50-nopretraining --da_bool True --da_strategy LISA-CutMix"
-#     # GroupDRO algorithm with resnet50-nopretraining
-#     "python -m domainbed.scripts.loop_arch_resnet --dataset_group A --algorithm GroupDRO --architecture resnet50-nopretraining --da_bool False"
-#     "python -m domainbed.scripts.loop_arch_resnet --dataset_group B --algorithm GroupDRO --architecture resnet50-nopretraining --da_bool False"
-#     "python -m domainbed.scripts.loop_arch_resnet --dataset_group C --algorithm GroupDRO --architecture resnet50-nopretraining --da_bool False"
-#     # MMD-AE algorithm with resnet50-nopretraining
-#     "python -m domainbed.scripts.loop_arch_resnet --dataset_group A --algorithm MMD-AE --architecture resnet50-nopretraining --da_bool False"
-#     "python -m domainbed.scripts.loop_arch_resnet --dataset_group B --algorithm MMD-AE --architecture resnet50-nopretraining --da_bool False"
-#     "python -m domainbed.scripts.loop_arch_resnet --dataset_group C --algorithm MMD-AE --architecture resnet50-nopretraining --da_bool False"
-   
-#     # vit
-
-#     "python -m domainbed.scripts.loop_arch_resnet --dataset_group A --algorithm ERM --architecture vit-b --da_bool False"
-#     "python -m domainbed.scripts.loop_arch_resnet --dataset_group A --algorithm ERM --architecture vit-b --da_bool True --da_strategy random_shuffle-Mixup"
-#     "python -m domainbed.scripts.loop_arch_resnet --dataset_group A --algorithm ERM --architecture vit-b --da_bool True --da_strategy random_shuffle-CutMix"
-#     "python -m domainbed.scripts.loop_arch_resnet --dataset_group A --algorithm ERM --architecture vit-b --da_bool True --da_strategy LISA-Mixup"
-#     "python -m domainbed.scripts.loop_arch_resnet --dataset_group A --algorithm ERM --architecture vit-b --da_bool True --da_strategy LISA-CutMix"
-#     "python -m domainbed.scripts.loop_arch_resnet --dataset_group B --algorithm ERM --architecture vit-b --da_bool False"
-#     "python -m domainbed.scripts.loop_arch_resnet --dataset_group B --algorithm ERM --architecture vit-b --da_bool True --da_strategy random_shuffle-Mixup"
-#     "python -m domainbed.scripts.loop_arch_resnet --dataset_group B --algorithm ERM --architecture vit-b --da_bool True --da_strategy random_shuffle-CutMix"
-#     "python -m domainbed.scripts.loop_arch_resnet --dataset_group B --algorithm ERM --architecture vit-b --da_bool True --da_strategy LISA-Mixup"
-#     "python -m domainbed.scripts.loop_arch_resnet --dataset_group B --algorithm ERM --architecture vit-b --da_bool True --da_strategy LISA-CutMix"
-#     "python -m domainbed.scripts.loop_arch_resnet --dataset_group C --algorithm ERM --architecture vit-b --da_bool False"
-#     "python -m domainbed.scripts.loop_arch_resnet --dataset_group C --algorithm ERM --architecture vit-b --da_bool True --da_strategy random_shuffle-Mixup"
-#     "python -m domainbed.scripts.loop_arch_resnet --dataset_group C --algorithm ERM --architecture vit-b --da_bool True --da_strategy random_shuffle-CutMix"
-#     "python -m domainbed.scripts.loop_arch_resnet --dataset_group C --algorithm ERM --architecture vit-b --da_bool True --da_strategy LISA-Mixup"
-#     "python -m domainbed.scripts.loop_arch_resnet --dataset_group C --algorithm ERM --architecture vit-b --da_bool True --da_strategy LISA-CutMix"
-    
-#     ## GroupDRO algorithm
-#     "python -m domainbed.scripts.loop_arch_resnet --dataset_group A --algorithm GroupDRO --architecture vit-b --da_bool False"
-#     "python -m domainbed.scripts.loop_arch_resnet --dataset_group B --algorithm GroupDRO --architecture vit-b --da_bool False"
-#     "python -m domainbed.scripts.loop_arch_resnet --dataset_group C --algorithm GroupDRO --architecture vit-b --da_bool False"
-
-#     ## MMD-AE algorithm
-#     "python -m domainbed.scripts.loop_arch_resnet --dataset_group A --algorithm MMD-AE --architecture vit-b --da_bool False"
-#     "python -m domainbed.scripts.loop_arch_resnet --dataset_group B --algorithm MMD-AE --architecture vit-b --da_bool False"
-#     "python -m domainbed.scripts.loop_arch_resnet --dataset_group C --algorithm MMD-AE --architecture vit-b --da_bool False"
-
-#     # resnet50
-
-#     "python -m domainbed.scripts.loop_arch_resnet --dataset_group A --algorithm ERM --architecture resnet50 --da_bool True --da_strategy random_shuffle-Mixup"
-#     "python -m domainbed.scripts.loop_arch_resnet --dataset_group A --algorithm ERM --architecture resnet50 --da_bool True --da_strategy random_shuffle-CutMix"
-#     "python -m domainbed.scripts.loop_arch_resnet --dataset_group A --algorithm ERM --architecture resnet50 --da_bool True --da_strategy LISA-Mixup"
-#     "python -m domainbed.scripts.loop_arch_resnet --dataset_group A --algorithm ERM --architecture resnet50 --da_bool True --da_strategy LISA-CutMix"
-#     "python -m domainbed.scripts.loop_arch_resnet --dataset_group B --algorithm ERM --architecture resnet50 --da_bool True --da_strategy random_shuffle-Mixup"
-#     "python -m domainbed.scripts.loop_arch_resnet --dataset_group B --algorithm ERM --architecture resnet50 --da_bool True --da_strategy random_shuffle-CutMix"
-#     "python -m domainbed.scripts.loop_arch_resnet --dataset_group B --algorithm ERM --architecture resnet50 --da_bool True --da_strategy LISA-Mixup"
-#     "python -m domainbed.scripts.loop_arch_resnet --dataset_group B --algorithm ERM --architecture resnet50 --da_bool True --da_strategy LISA-CutMix"
-#     "python -m domainbed.scripts.loop_arch_resnet --dataset_group C --algorithm ERM --architecture resnet50 --da_bool True --da_strategy random_shuffle-Mixup"
-#     "python -m domainbed.scripts.loop_arch_resnet --dataset_group C --algorithm ERM --architecture resnet50 --da_bool True --da_strategy random_shuffle-CutMix"
-#     "python -m domainbed.scripts.loop_arch_resnet --dataset_group C --algorithm ERM --architecture resnet50 --da_bool True --da_strategy LISA-Mixup"
-#     "python -m domainbed.scripts.loop_arch_resnet --dataset_group C --algorithm ERM --architecture resnet50 --da_bool True --da_strategy LISA-CutMix"
-# )
 
 declare -a VIT_COMMANDS=(
  "python -m domainbed.scripts.loop_arch_resnet --dataset SpawriousO2O_easy --algorithm ERM --architecture vit-b --da_bool False --n_iter 3" 
@@ -171,13 +99,13 @@ for CMD in "${VIT_COMMANDS[@]}"; do
         sleep 1h
     fi
 
-    DATASET_GROUP=$(echo $CMD | awk -F '--dataset_group ' '{split($2, a, " "); print a[1]}')
+    DATASET=$(echo $CMD | awk -F '--dataset ' '{split($2, a, " "); print a[1]}')
     ALGORITHM=$(echo $CMD | awk -F '--algorithm ' '{split($2, a, " "); print a[1]}')
     ARCHITECTURE=$(echo $CMD | awk -F '--architecture ' '{split($2, a, " "); print a[1]}')
     DA_BOOL=$(echo $CMD | awk -F '--da_bool ' '{split($2, a, " "); print a[1]}')
     DA_STRATEGY=$(echo $CMD | awk -F '--da_strategy ' '{split($2, a, " "); print a[1]}')
 
-    # DATASET_GROUP=$(echo $CMD | sed -n 's/.*--dataset_group \([a-zA-Z0-9_]*\).*/\1/p')
+    # DATASET=$(echo $CMD | sed -n 's/.*--dataset \([a-zA-Z0-9_]*\).*/\1/p')
     # ALGORITHM=$(echo $CMD | sed -n 's/.*--algorithm \([a-zA-Z0-9_]*\).*/\1/p')
     # ARCHITECTURE=$(echo $CMD | sed -n 's/.*--architecture \([a-zA-Z0-9_]*\).*/\1/p')
     # DA_BOOL=$(echo $CMD | sed -n 's/.*--da_bool \([a-zA-Z0-9_]*\).*/\1/p'd)
@@ -185,7 +113,7 @@ for CMD in "${VIT_COMMANDS[@]}"; do
 
 
 
-    JOB_NAME="${DATASET_GROUP}_${ALGORITHM}_${ARCHITECTURE}_${DA_BOOL}"
+    JOB_NAME="${DATASET}_${ALGORITHM}_${ARCHITECTURE}_${DA_BOOL}"
     if [ ! -z "$DA_STRATEGY" ]; then
         JOB_NAME="${JOB_NAME}_${DA_STRATEGY}"
     fi
@@ -200,7 +128,8 @@ for CMD in "${VIT_COMMANDS[@]}"; do
 #$ -pe smp 16
 #$ -N $JOB_NAME
 #$ -R y
-#$ -ac allow=E,F
+# request an A100 node only
+#$ -ac allow=L
 #$ -S /bin/bash
 #$ -wd /home/zcahaly/Scratch/DomainBed
 #$ -j y
@@ -253,13 +182,13 @@ for CMD in "${REST_COMMANDS[@]}"; do
         sleep 1h
     fi
 
-    DATASET_GROUP=$(echo $CMD | awk -F '--dataset_group ' '{split($2, a, " "); print a[1]}')
+    DATASET=$(echo $CMD | awk -F '--dataset ' '{split($2, a, " "); print a[1]}')
     ALGORITHM=$(echo $CMD | awk -F '--algorithm ' '{split($2, a, " "); print a[1]}')
     ARCHITECTURE=$(echo $CMD | awk -F '--architecture ' '{split($2, a, " "); print a[1]}')
     DA_BOOL=$(echo $CMD | awk -F '--da_bool ' '{split($2, a, " "); print a[1]}')
     DA_STRATEGY=$(echo $CMD | awk -F '--da_strategy ' '{split($2, a, " "); print a[1]}')
 
-    # DATASET_GROUP=$(echo $CMD | sed -n 's/.*--dataset_group \([a-zA-Z0-9_]*\).*/\1/p')
+    # DATASET=$(echo $CMD | sed -n 's/.*--dataset \([a-zA-Z0-9_]*\).*/\1/p')
     # ALGORITHM=$(echo $CMD | sed -n 's/.*--algorithm \([a-zA-Z0-9_]*\).*/\1/p')
     # ARCHITECTURE=$(echo $CMD | sed -n 's/.*--architecture \([a-zA-Z0-9_]*\).*/\1/p')
     # DA_BOOL=$(echo $CMD | sed -n 's/.*--da_bool \([a-zA-Z0-9_]*\).*/\1/p'd)
@@ -267,7 +196,7 @@ for CMD in "${REST_COMMANDS[@]}"; do
 
 
 
-    JOB_NAME="${DATASET_GROUP}_${ALGORITHM}_${ARCHITECTURE}_${DA_BOOL}"
+    JOB_NAME="${DATASET}_${ALGORITHM}_${ARCHITECTURE}_${DA_BOOL}"
     if [ ! -z "$DA_STRATEGY" ]; then
         JOB_NAME="${JOB_NAME}_${DA_STRATEGY}"
     fi
