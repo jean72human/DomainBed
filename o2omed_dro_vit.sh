@@ -3,7 +3,7 @@
 #$ -l h_rt=42:00:00
 #$ -l gpu=1
 #$ -pe smp 16
-#$ -N $JOB_NAME
+#$ -N o2omed_dro_vit
 #$ -R y
 # request an A100 node only
 #$ -ac allow=L
@@ -12,7 +12,7 @@
 #$ -j y
 
 module load python/miniconda3/4.10.3
-source \$UCL_CONDA_PATH/etc/profile.d/conda.sh
+source $UCL_CONDA_PATH/etc/profile.d/conda.sh
 conda activate domainbed
 
 date
