@@ -8,7 +8,14 @@ api = wandb.Api()
 
 # %%
 runs = api.runs("remix_school-of-rock/aengus-spawrious-comprehensive-runs")
+runs2 = api.runs("remix_school-of-rock/aengus-spawrious-comprehensive-runs-round2")
 len(runs)
+len(runs2)
+len(runs) + len(runs2)
+
+# %%
+
+# %%
 
 # %%
 s = 'alg-ERM_it-0_arch-resnet50-nopretraining_ds-SpawriousO2O_easy'
@@ -127,6 +134,32 @@ for run in runs:
     run_dict['test_acc'] = test_acc
     pre_integration_run_dict_list.append(run_dict)
 
+for run in runs2:
+    if run.state != 'finished':
+        continue
+    # summary = run.summary
+    # history = run.history()
+    count += 1
+    # if count > 10:
+    #     break
+    print(f"count: {count}")
+    run_dict = get_run_info_from_name(run.name)
+    da_bool, da_strategy, da_interp = get_da_info_from_output_dir(run.config['output_dir'])
+    if da_bool:
+        run_dict['alg'] = da_strategy + '-' + da_interp
+    # run_dict['test_results'] = []
+    # run_dict['test_results'].append(run.summary['env0_out_acc'])
+    # run_dict['test_results'].append(run.summary['env0_in_acc'])
+    print('about to look at this run_dict')
+    print(run_dict)
+    test_acc = get_early_stopping_test_acc(run)
+    if test_acc == 'failed':
+        continue
+    run_dict['test_acc'] = test_acc
+    pre_integration_run_dict_list.append(run_dict)
+
+print(f"count: {count}")
+
 print(f"count: {count}")
 # %%
 
@@ -134,7 +167,7 @@ print(f"count: {count}")
 # Create the dictionaries that I will need
 integrated_run_list = []
 datasets =["SpawriousO2O_easy", "SpawriousO2O_medium", "SpawriousO2O_hard", "SpawriousM2M_easy", "SpawriousM2M_medium", "SpawriousM2M_hard"]
-algs = ['ERM', 'GroupDRO', 'MMD-AE', 'LISA-Mixup', 'LISA-CutMix', 'random_shuffle-CutMix', 'random_shuffle-Mixup']
+algs = ['ERM', 'GroupDRO', 'MMD', 'LISA-Mixup', 'LISA-CutMix', 'random_shuffle-CutMix', 'random_shuffle-Mixup']
 da_algs = ['LISA-Mixup', 'LISA-CutMix', 'random_shuffle-CutMix', 'random_shuffle-Mixup']
 archs = ['resnet50-nopretraining', 'vit-b']
 
@@ -212,7 +245,7 @@ print(vitb_completed_count)
     
 # %%
 import json
-with open('integrated_run_list.jsonl', 'w') as f:
+with open('combined_integrated_run_list.jsonl', 'w') as f:
     for item in integrated_run_list:
         f.write(json.dumps(item) + '\n')
 # %%
