@@ -314,6 +314,8 @@ if __name__ == "__main__":
                     step_vals = algorithm.update(minibatches_device, uda_device, retrain=True)
             elif args.algorithm == "CutMix":
                 step_vals = algorithm.update(minibatches=minibatches_device, unlabeled=uda_device, mix_strategy=args.mix_strategy, mix_interpolation=args.mix_interpolation)
+            elif args.algorithm == "W2D":
+                step_vals = algorithm.update(minibatches=minibatches_device, unlabeled=uda_device, step=step)
             else:
                 step_vals = algorithm.update(minibatches_device, uda_device)
 

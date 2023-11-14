@@ -38,6 +38,17 @@ data_dir = "./data/spawrious224"
 batch_size = 128
 # batch_size = 2
 
+
+#     elif algorithm == "W2D":
+#         _hparam('rsc_f_drop_factor', 1 / 4, lambda r: r.uniform(0.1, 0.4))
+#         _hparam('last_k_epoch', 1 / 4, lambda r: r.uniform(0.2, 0.4))
+#         if dataset in SMALL_DATASET:
+#             _hparam('rsc_b_drop_factor', 1 / 4, lambda r: r.uniform(0.1, 0.3))
+#             _hparam('worst_case_p', 1 / 3, lambda r: r.uniform(0.1, 0.5))
+#         else:
+#             _hparam('rsc_b_drop_factor', 1 / 3, lambda r: r.uniform(0.1, 0.4))
+#             _hparam('worst_case_p', 1 / 3, lambda r: r.uniform(0.2, 0.4))
+
 hparams_dict = {
     "SpawriousO2O_easy": {
         "ERM": """{"batch_size": batchsize, 
@@ -48,6 +59,19 @@ hparams_dict = {
                 "arch": "archused", 
                 "resnet_dropout": 0.1,
                 "weight_decay": 1.1975155295174919e-06}""",
+        "W2D": """{
+                "batch_size": batchsize, 
+                "class_balanced": false, 
+                "data_augmentation": true, 
+                "lr": 0.00016629177873519647, 
+                "nonlinear_classifier": false, 
+                "arch": "archused", 
+                "resnet_dropout": 0.1,
+                "weight_decay": 1.1975155295174919e-06,
+                "rsc_f_drop_factor": 1 / 4,
+                "last_k_epoch": 1 / 4,
+                "rsc_b_drop_factor": 1 / 3,
+                "worst_case_p": 1 / 3}""",
         "JTT": """{"batch_size": batchsize, 
                 "class_balanced": false, 
                 "data_augmentation": true, 
@@ -175,6 +199,18 @@ hparams_dict = {
                 "arch": "archused", 
                 "resnet_dropout": 0.1,
                 "weight_decay": 2.7643974709171963e-05}""",
+        "W2D": """{"batch_size": batchsize, 
+                "class_balanced": false, 
+                "data_augmentation": true, 
+                "lr": 0.0001653813153854724, 
+                "nonlinear_classifier": false, 
+                "arch": "archused", 
+                "resnet_dropout": 0.1,
+                "weight_decay": 2.7643974709171963e-05
+                "rsc_f_drop_factor": 1 / 4,
+                "last_k_epoch": 1 / 4,
+                "rsc_b_drop_factor": 1 / 3,
+                "worst_case_p": 1 / 3}""",
         "JTT": """{"batch_size": batchsize, 
                 "class_balanced": false, 
                 "data_augmentation": true, 

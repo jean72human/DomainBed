@@ -27,7 +27,11 @@ nvidia-smi
 # python -m domainbed.scripts.loop_arch_resnet --dataset_group A --algorithm ERM --architecture resnet50-nopretraining --da_bool True --da_strategy LISA-CutMix
 
 # # Group B, ERM algorithm
-python -m domainbed.scripts.loop_arch_resnet --dataset_group B --algorithm ERM --architecture resnet50-nopretraining --da_bool False
+# python -m domainbed.scripts.loop_arch_resnet --dataset_group B --algorithm ERM --architecture resnet50-nopretraining --da_bool False
+
+python -m domainbed.scripts.loop_arch_resnet --dataset_group A --algorithm W2D --architecture resnet50 --da_bool False
+python -m domainbed.scripts.loop_arch_resnet --dataset_group B --algorithm W2D --architecture resnet50 --da_bool False
+python -m domainbed.scripts.loop_arch_resnet --dataset_group C --algorithm W2D --architecture resnet50 --da_bool False
 # python -m domainbed.scripts.loop_arch_resnet --dataset_group B --algorithm ERM --architecture resnet50-nopretraining --da_bool True --da_strategy random_shuffle-Mixup
 # python -m domainbed.scripts.loop_arch_resnet --dataset_group B --algorithm ERM --architecture resnet50-nopretraining --da_bool True --da_strategy random_shuffle-CutMix
 # python -m domainbed.scripts.loop_arch_resnet --dataset_group B --algorithm ERM --architecture resnet50-nopretraining --da_bool True --da_strategy LISA-Mixup

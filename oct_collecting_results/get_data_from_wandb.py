@@ -249,3 +249,17 @@ with open('combined_integrated_run_list.jsonl', 'w') as f:
     for item in integrated_run_list:
         f.write(json.dumps(item) + '\n')
 # %%
+
+jsonl_data = []
+with open('combined_integrated_run_list.jsonl', 'r') as f:
+    for line in f:
+        jsonl_data.append(json.loads(line))
+    
+# %%
+
+table_data = []
+for line in jsonl_data:
+    data_dict = {}
+    data_dict['alg'] = line['configs']['alg']
+    data_dict['arch'] = line['configs']['arch']
+    data_dict[line['configs']['ds']] = {}

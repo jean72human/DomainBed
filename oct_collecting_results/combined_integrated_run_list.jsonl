@@ -15,7 +15,7 @@
 {"configs": {"ds": "SpawriousO2O_medium", "alg": "ERM", "arch": "resnet50-nopretraining"}, "test_acc": [0.48076543696981655, 0.48352732294338135, 0.44165515880844347], "n_iterations": 3, "iterations_left": 0}
 {"configs": {"ds": "SpawriousO2O_medium", "alg": "ERM", "arch": "vit-b"}, "test_acc": [0.5271256658117972, 0.4716906687709607, 0.5119352929571908], "n_iterations": 3, "iterations_left": 0}
 {"configs": {"ds": "SpawriousO2O_medium", "alg": "GroupDRO", "arch": "resnet50-nopretraining"}, "test_acc": [0.44550207141448017, 0.4855987374235549, 0.4645393568751233], "n_iterations": 3, "iterations_left": 0}
-{"configs": {"ds": "SpawriousO2O_medium", "alg": "GroupDRO", "arch": "vit-b"}, "test_acc": [], "n_iterations": 0, "iterations_left": 3}
+{"configs": {"ds": "SpawriousO2O_medium", "alg": "GroupDRO", "arch": "vit-b"}, "test_acc": [0.5192838824225685, 0.5013809429867824, 0.5223416847504438], "n_iterations": 3, "iterations_left": 0}
 {"configs": {"ds": "SpawriousO2O_medium", "alg": "MMD", "arch": "resnet50-nopretraining"}, "test_acc": [0.5030578023278753, 0.4426415466561452, 0.46044584730716115], "n_iterations": 3, "iterations_left": 0}
 {"configs": {"ds": "SpawriousO2O_medium", "alg": "MMD", "arch": "vit-b"}, "test_acc": [0.5184454527520221, 0.5257447228250148, 0.5564707042809233], "n_iterations": 3, "iterations_left": 0}
 {"configs": {"ds": "SpawriousO2O_medium", "alg": "LISA-Mixup", "arch": "resnet50-nopretraining"}, "test_acc": [0.44165515880844347, 0.48352732294338135, 0.44165515880844347], "n_iterations": 3, "iterations_left": 0}

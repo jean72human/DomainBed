@@ -61,6 +61,17 @@ def _hparams(algorithm, dataset, random_seed):
         _hparam('irm_lambda', 1e2, lambda r: 10**r.uniform(-1, 5))
         _hparam('irm_penalty_anneal_iters', 500,
                 lambda r: int(10**r.uniform(0, 4)))
+        
+    elif algorithm == "W2D":
+        _hparam('rsc_f_drop_factor', 1 / 4, lambda r: r.uniform(0.1, 0.4))
+        _hparam('last_k_epoch', 1 / 4, lambda r: r.uniform(0.2, 0.4))
+        # if dataset in SMALL_DATASET:
+            # _hparam('rsc_b_drop_factor', 1 / 4, lambda r: r.uniform(0.1, 0.3))
+            # _hparam('worst_case_p', 1 / 3, lambda r: r.uniform(0.1, 0.5))
+        # else:
+        _hparam('rsc_b_drop_factor', 1 / 3, lambda r: r.uniform(0.1, 0.4))
+        _hparam('worst_case_p', 1 / 3, lambda r: r.uniform(0.2, 0.4))
+        # _hparam('last_k_epoch', 0.2, lambda r: r.choice([0.2, 0.4]))
 
     elif algorithm == "Mixup":
         _hparam('mixup_alpha', 0.2, lambda r: 10**r.uniform(-1, -1))
