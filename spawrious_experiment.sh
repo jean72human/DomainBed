@@ -2,7 +2,7 @@
 #$ -l h_rt=42:00:00
 #$ -l gpu=1
 #$ -pe smp 16
-#$ -N tester_for_script
+#$ -N w2d-runs
 #$ -R y
 #$ -ac allow=E,F
 #$ -S /bin/bash
