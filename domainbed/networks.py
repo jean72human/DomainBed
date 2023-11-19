@@ -97,12 +97,19 @@ class ResNet(torch.nn.Module):
             # save memory
             del self.network.fc
             self.network.fc = Identity()
-
         elif hparams['arch']=="vit-b":
             self.network = torchvision.models.vit_b_16(torchvision.models.ViT_B_16_Weights.IMAGENET1K_V1)
             self.n_outputs = 768
             del self.network.heads 
             self.network.heads = Identity()
+        elif hparams['arch']=="vit-foundation":
+            print("USING A SUPER DUPER FOUNDATION MODEL")
+            self.network = timm.create_model(
+                'vit_so400m_patch14_siglip_384',
+                pretrained=True,
+                num_classes=0,
+            )
+            self.n_outputs = 1152
         elif hparams['arch']=="beit-b":
             self.network = timm.create_model('beit_base_patch16_224_in22k', pretrained=True)
             self.n_outputs = 768
@@ -129,6 +136,14 @@ class ResNet(torch.nn.Module):
 
     def forward(self, x):
         """Encode x into a feature vector of size n_outputs."""
+        if self.hparams['arch']=="vit-foundation":
+            from torchvision.transforms import Resize
+
+            # Define the transform
+            transform = Resize((384, 384))  # Adjust the size to match your model's expected input
+
+            # Apply the transform to your image
+            x = transform(x)
         return self.dropout(self.network(x))
 
     def train(self, mode=True):

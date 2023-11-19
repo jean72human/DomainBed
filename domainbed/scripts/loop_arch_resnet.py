@@ -372,6 +372,13 @@ if dataset is None:
 else:
         dataset_list = [dataset]
 
+# TODO: remove this temp code
+dataset_list = ["SpawriousM2M_hard"]
+
+# sleep for 4 hours 
+
+arch = 'vit-foundation'
+# arch = 'vit-b'
 # for dataset in dataset_group_dict[dataset_group]:
 for dataset in dataset_list:
 
@@ -384,17 +391,21 @@ for dataset in dataset_list:
         .replace("archused", arch)
         )
         hparams = hparams.replace("\n", "").replace(" ", "")
+        # algo = "CutMix"
 
         print(f"Train {algo} on {dataset}")
 
         if da_bool:
-
+                print('about to sleep for 4 hours')
+                # time.sleep(14400)
+                print('done sleeping')
                 os.system(
-                f"""python3 -m domainbed.scripts.train_n --data_dir={data_dir}  --algorithm {algo} --test_env 0 --dataset {dataset} --hparams='{hparams}' --seed {args.seed} --output_dir {algo}-{arch}-{da_strategy}-results --n_iter {args.n_iter} --mix_strategy {mix_strategy} --mix_interpolation {mix_interpolation}"""
+                f"""python3 -m domainbed.scripts.train_n --data_dir={data_dir}  --algorithm {algo} --test_env 0 --dataset {dataset} --hparams='{hparams}' --seed {args.seed} --output_dir mixup2-rebuttal-results --n_iter 1 --mix_strategy {mix_strategy} --mix_interpolation {mix_interpolation}"""
                 )
+                # os.system(
+                # f"""python3 -m domainbed.scripts.train_n --data_dir={data_dir}  --algorithm ERM --test_env 0 --dataset {dataset} --hparams='{hparams}' --seed {args.seed} --output_dir erm-rebuttal-results --n_iter 1"""
+                # )
                 
         else:
                 
-                os.system(
-                f"""python3 -m domainbed.scripts.train_n --data_dir={data_dir}  --algorithm {algo} --test_env 0 --dataset {dataset} --hparams='{hparams}' --seed {args.seed} --output_dir {algo}-{arch}-{da_strategy}-results --n_iter {args.n_iter} """
-                )
+                os.system(f"""python3 -m domainbed.scripts.train_n --data_dir={data_dir}  --algorithm {algo} --test_env 0 --dataset {dataset} --hparams='{hparams}' --seed {args.seed} --output_dir {algo}-{arch}-{da_strategy}-results --n_iter {args.n_iter} """)

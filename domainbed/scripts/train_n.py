@@ -153,7 +153,8 @@ if __name__ == "__main__":
         run = wandb.init(
             project='aengus-spawrious-comprehensive-runs-round2', 
             entity='remix_school-of-rock',
-            name=f"alg-{args.algorithm}_it-{iteration}_arch-{hparams['arch']}_ds-{args.dataset}",
+            # name=f"alg-{args.algorithm}_it-{iteration}_arch-{hparams['arch']}_ds-{args.dataset}",
+            name='mixup-test-rebuttal-1-ERM',
             )
         wandb.config.update(args)
         wandb.config.update({"!architecture": hparams['arch']})
