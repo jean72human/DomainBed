@@ -120,7 +120,6 @@ class ERM(Algorithm):
         super(ERM, self).__init__(input_shape, num_classes, num_domains,
                                   hparams)
         self.featurizer = networks.Featurizer(input_shape, self.hparams)
-        breakpoint()
         self.classifier = networks.Classifier(
             self.featurizer.n_outputs,
             num_classes,

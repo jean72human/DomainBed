@@ -377,8 +377,8 @@ dataset_list = ["SpawriousM2M_hard"]
 
 # sleep for 4 hours 
 
-arch = 'vit-foundation'
-# arch = 'vit-b'
+
+
 # for dataset in dataset_group_dict[dataset_group]:
 for dataset in dataset_list:
 
